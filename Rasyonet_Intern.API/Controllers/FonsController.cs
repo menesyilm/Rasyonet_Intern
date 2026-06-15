@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Rasyonet_Intern.API.Data;
@@ -11,29 +13,21 @@ namespace Rasyonet_Intern.API.Controllers
     public class FonsController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public FonsController(AppDbContext context)
+        private readonly IMapper _mapper;
+        public FonsController(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
         [HttpGet]
         public async Task<IActionResult> FonList()
         {
-            var fonList = await _context.fonPerformanslar.
-                Include(x => x.FonKategori)
-                .Select(x => new FonPerformansDto
-                {
-                    FonPerformansId = x.FonPerformansId,
-                    FonKodu = x.FonKodu,
-                    FonAdi = x.FonAdi,
-                    Buyukluk = x.Buyukluk,
-                    Fiyat = x.Fiyat,
-                    GunlukDegisimYuzde = x.GunlukDegisimYuzde,
-                    HaftalikDegisimYuzde = x.HaftalikDegisimYuzde,
-                    AylikDegisimYuzde = x.AylikDegisimYuzde,
-                    KategoriAdi = x.FonKategori.KategoriAdi
-                })
+            var fonList = await _context.fonPerformanslar
+                .Include(x => x.FonKategori)
                 .ToListAsync();
-            return Ok(fonList);
+
+            var mappedFonList = _mapper.Map<List<FonPerformansDto>>(fonList);
+            return Ok(mappedFonList);
         }
     }
 }

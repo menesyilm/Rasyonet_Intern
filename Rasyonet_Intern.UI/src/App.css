@@ -1,108 +1,145 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
+html, body {
+  width: 100%;
+  height: 100%;
 }
 
-#center {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+.app-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 0;
+  margin: 0;
+  width: 100%;
 }
 
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
+.table-wrapper {
+  width: 100%;
+  margin: 0;
+  background-color: white;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+  padding: 5px;
+}
+
+.table-title {
+  font-size: 36px;
+  font-weight: 500;
+  color: green;
+  margin-left: 15px;
+}
+
+.performance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed;
+}
+
+.performance-table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.performance-table th {
+  padding: 4px 5px;
   text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
 }
 
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+.performance-table tbody tr {
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.2s;
+   height: 72px; /* sabit yükseklik */
 }
+
+.performance-table tbody tr.data-row:hover {
+  background-color: #f8f9fa;
+}
+
+.performance-table td {
+  padding: 4px 5px;
+  color: #666;
+}
+
+/* Kategori satırı */
+.performance-table .category-row {
+  background-color: #d4edda;
+  font-weight: 600;
+  color: #155724;
+  transition: background-color 0.2s;
+}
+
+.performance-table .category-row td {
+  padding: 15px;
+  font-size: 15px;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 10px !important;
+  padding: 15px !important;
+}
+
+.category-total {
+  text-align: left;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+}
+
+/* Empty category cells */
+.category-row td:nth-child(3),
+.category-row td:nth-child(4),
+.category-row td:nth-child(5),
+.category-row td:nth-child(6) {
+  background-color: #d4edda;
+  padding: 15px 0;
+}
+
+/* Dropdown arrow */
+.dropdown-arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+  font-size: 12px;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(90deg);
+}
+
+/* Fon kodu ve adı */
+.code-cell {
+  font-weight: 500;
+  color: #333;
+}
+
+.fon-code {
+  width: 280px; /* sabit kolon */
+  min-width: 280px;
+  max-width: 280px;
+  margin-bottom: 4px;
+  font-size: 15px;
+}
+
+.fon-adi {
+  font-size: 13px;
+  color: #666;
+  font-weight: normal;
+}
+
+.number-cell {
+  text-align: left;
+  font-family: 'Courier New', monospace;
+}
+
 
 #next-steps ul {
   list-style: none;
@@ -136,29 +173,6 @@
     }
   }
 
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
-}
-
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
 }
 
 .ticks {
