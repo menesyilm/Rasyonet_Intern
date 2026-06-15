@@ -1,0 +1,47 @@
+# Build
+bin/
+obj/
+
+# Visual Studio
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+
+# ASP.NET Core
+appsettings.Local.json
+appsettings.*.local.json
+
+# Logs
+*.log
+
+# Test / coverage
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# EF Core / migrations artifacts
+*.sqlite
+*.db
+
+# Publish
+publish/
+wwwroot/dist/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# NuGet
+*.nupkg
+packages/
+
+# MSBuild
+*.vcxproj.user
+*.csproj.user

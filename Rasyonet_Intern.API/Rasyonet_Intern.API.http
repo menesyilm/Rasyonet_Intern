@@ -1,0 +1,6 @@
+@Rasyonet_Intern.API_HostAddress = http://localhost:5010
+
+GET {{Rasyonet_Intern.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

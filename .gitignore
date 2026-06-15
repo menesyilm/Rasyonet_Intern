@@ -1,0 +1,48 @@
+# Visual Studio
+.vs/
+.vscode/
+*.sln.iml
+*.user
+*.suo
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Aa][Rr][Dd]64/
+
+# Visual Studio cache/options
+.vs/
+
+# ReSharper
+.idea/
+*.DotSettings
+*.DotSettings.user
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Rider
+.idea/
+*.sln.iml
+
+# artifacts
+artifacts/
+bin/
+obj/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Local environment files
+.env
+.env.local
+appsettings.Development.json
