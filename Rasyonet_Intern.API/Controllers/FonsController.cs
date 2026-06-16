@@ -1,33 +1,25 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Rasyonet_Intern.API.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using Rasyonet_Intern.API.DTOs;
+using Rasyonet_Intern.API.Repository;
 
 namespace Rasyonet_Intern.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FonsController : ControllerBase
+    public class CategoriesController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
-        public FonsController(AppDbContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
-        [HttpGet]
-        public async Task<IActionResult> FonList()
-        {
-            var fonList = await _context.fonPerformanslar
-                .Include(x => x.FonKategori)
-                .ToListAsync();
+        private readonly ICategoryRepository _repository;
 
-            var mappedFonList = _mapper.Map<List<FonPerformansDto>>(fonList);
-            return Ok(mappedFonList);
+        public CategoriesController(ICategoryRepository repository)
+        {
+            _repository = repository;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _repository.GetAllAsync();
+            return Ok(result);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Rasyonet_Intern.API.Mapping
     {
         public GeneralMapping()
         {
-            CreateMap<FonPerformans, FonPerformansDto>().ForMember(dest => dest.KategoriAdi,opt => opt.MapFrom(src => src.FonKategori.KategoriAdi)).ReverseMap();
+            CreateMap<Performance, PerformanceDto>().ReverseMap();
         }
     }
 }

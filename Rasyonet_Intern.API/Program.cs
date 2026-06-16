@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using Rasyonet_Intern.API.Data;
-using Rasyonet_Intern.API.Mapping;
+using Rasyonet_Intern.API.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,11 +10,19 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-//Sql Connection
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+//MongoDB Bağlantısı
+var mongoClient = new MongoClient(
+    builder.Configuration["MongoDbSettings:ConnectionString"]);
+
+var database = mongoClient.GetDatabase(
+    builder.Configuration["MongoDbSettings:DatabaseName"]);
+
+builder.Services.AddSingleton<IMongoDatabase>(database);
+builder.Services.AddSingleton<MongoDbContext>();
 //AutoMapper
 builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);
+// Repository
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 // CORS ayarları
 builder.Services.AddCors(options =>
 {
