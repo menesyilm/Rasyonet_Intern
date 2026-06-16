@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import PerformancePage from './pages/PerformancePage'
-import PieChartPage from './pages/PieChartPage'
+import ChartsPage from './pages/ChartsPage'
 
 function App() {
   return (
@@ -11,8 +11,8 @@ function App() {
       />
 
       <Route
-        path="/distribution"
-        element={<PieChartPage />}
+        path="/charts"
+        element={<ChartsPage/>}
       />
     </Routes>
   )

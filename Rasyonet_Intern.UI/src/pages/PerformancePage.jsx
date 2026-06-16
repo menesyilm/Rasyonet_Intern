@@ -88,7 +88,7 @@ function PerformancePage() {
           Performans
         </h1>
         <NavigationButton
-        to="/distribution"
+        to="/charts"
         text="Portföy Dağılımı"
       />
         </div>
