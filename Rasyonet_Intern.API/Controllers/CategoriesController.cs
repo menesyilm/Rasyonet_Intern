@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Rasyonet_Intern.API.DTOs;
-using Rasyonet_Intern.API.Repository;
+using Rasyonet_Intern.API.Repositories.Interfaces;
 
 namespace Rasyonet_Intern.API.Controllers
 {

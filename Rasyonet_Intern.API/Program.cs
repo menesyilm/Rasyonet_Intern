@@ -1,6 +1,8 @@
 using MongoDB.Driver;
+using Rasyonet_Intern.API.Controllers;
 using Rasyonet_Intern.API.Data;
-using Rasyonet_Intern.API.Repository;
+using Rasyonet_Intern.API.Repositories.Implementations;
+using Rasyonet_Intern.API.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +23,9 @@ builder.Services.AddSingleton<IMongoDatabase>(database);
 builder.Services.AddSingleton<MongoDbContext>();
 //AutoMapper
 builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);
-// Repository
+// Repositories
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ISaleRepository, SaleRepository>();
 // CORS ayarları
 builder.Services.AddCors(options =>
 {

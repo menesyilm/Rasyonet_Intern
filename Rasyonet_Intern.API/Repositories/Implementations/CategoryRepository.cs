@@ -3,26 +3,26 @@ using MongoDB.Driver;
 using Rasyonet_Intern.API.Data;
 using Rasyonet_Intern.API.DTOs;
 using Rasyonet_Intern.API.Models;
+using Rasyonet_Intern.API.Repositories.Interfaces;
 
-namespace Rasyonet_Intern.API.Repository
+namespace Rasyonet_Intern.API.Repositories.Implementations
 {
     public class CategoryRepository : ICategoryRepository
     {
-        private readonly IMongoCollection<Category> _collection;
+        private readonly IMongoCollection<Category> _categoryCollection;
 
         public CategoryRepository(MongoDbContext context)
         {
-            _collection = context.Categories;
+            _categoryCollection = context.Categories;
         }
 
         public async Task<List<Category>> GetAllAsync()
         {
-            return await _collection.Find(_ => true).ToListAsync();
+            return await _categoryCollection.Find(_ => true).ToListAsync();
         }
-
         public async Task<List<CategoryChartDto>> GetChartData()
         {
-            var categories = await _collection.Find(_ => true).ToListAsync();
+            var categories = await _categoryCollection.Find(_ => true).ToListAsync();
 
             var result = categories.Select(c => new CategoryChartDto
             {
@@ -32,5 +32,7 @@ namespace Rasyonet_Intern.API.Repository
 
             return result;
         }
+       
+
     }
 }

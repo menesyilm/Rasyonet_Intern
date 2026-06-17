@@ -1,7 +1,7 @@
 ﻿using Rasyonet_Intern.API.DTOs;
 using Rasyonet_Intern.API.Models;
 
-namespace Rasyonet_Intern.API.Repository
+namespace Rasyonet_Intern.API.Repositories.Interfaces
 {
     public interface ICategoryRepository
     {

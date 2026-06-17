@@ -15,5 +15,7 @@ namespace Rasyonet_Intern.API.Data
 
         public IMongoCollection<Category> Categories =>
             _database.GetCollection<Category>("Categories");
+        public IMongoCollection<Sale> Sales =>
+            _database.GetCollection<Sale>("Sales");
     }
 }
