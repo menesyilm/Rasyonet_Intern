@@ -1,13 +1,12 @@
 using MongoDB.Driver;
-using Rasyonet_Intern.API.Controllers;
 using Rasyonet_Intern.API.Data;
 using Rasyonet_Intern.API.Repositories.Implementations;
 using Rasyonet_Intern.API.Repositories.Interfaces;
+using Rasyonet_Intern.API.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -26,6 +25,9 @@ builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);
 // Repositories
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
+// MemoryCache
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<CacheService>();
 // CORS ayarları
 builder.Services.AddCors(options =>
 {

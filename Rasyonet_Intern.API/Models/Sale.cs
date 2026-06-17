@@ -7,7 +7,7 @@ namespace Rasyonet_Intern.API.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [BsonElement("saleDate")]
         public DateTime SaleDate { get; set; }
@@ -19,7 +19,7 @@ namespace Rasyonet_Intern.API.Models
         public string StoreLocation { get; set; } = string.Empty;
 
         [BsonElement("customer")]
-        public SaleCustomer Customer { get; set; }
+        public SaleCustomer Customer { get; set; } = new SaleCustomer();
 
         [BsonElement("couponUsed")]
         public bool CouponUsed { get; set; }

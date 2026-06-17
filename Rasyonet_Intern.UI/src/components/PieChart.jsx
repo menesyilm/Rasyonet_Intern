@@ -6,47 +6,9 @@ import {
   HiOutlineTableCells
 } from 'react-icons/hi2'
 
-function PieChart() {
+function PieChart({ chartData }) {
   const chartRef = useRef(null)
-  const [chartData, setChartData] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
   const [view, setView] = useState('pie')
-
-  // Backend endpoint'ini çağır ve veriyi çek
-  useLayoutEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch('http://localhost:5010/api/sales/chart/by-purchase-method')
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const data = await response.json()
-
-        // Backend: { purchaseMethod, totalSales, orderCount }
-        // Chart beklediği: { category, value }
-        const mappedData = data.map(item => ({
-          category: item.purchaseMethod,     // Pie dilimi etiketi (Online, Phone, In store)
-          value: item.totalSales,            // Pie dilimi boyutu (toplam satış)
-          orderCount: item.orderCount        // Bonus bilgi
-        }))
-
-        setChartData(mappedData)
-        setError(null)
-      } catch (err) {
-        console.error('Veri çekme hatası:', err)
-        setError(err.message)
-        setChartData([])
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [])
 
   // Chart render işlemi
   useLayoutEffect(() => {
@@ -76,32 +38,6 @@ function PieChart() {
       root.dispose()
     }
   }, [view, chartData])
-
-  if (loading) {
-    return (
-      <div className="bg-white rounded-lg p-5 shadow mb-5">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-5">
-          Ödeme Yöntemine Göre Dağılım
-        </h2>
-        <div className="flex justify-center items-center h-96">
-          <p className="text-gray-500">Yükleniyor...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="bg-white rounded-lg p-5 shadow mb-5">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-5">
-          Ödeme Yöntemine Göre Dağılım
-        </h2>
-        <div className="flex justify-center items-center h-96">
-          <p className="text-red-500">Hata: {error}</p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="bg-white rounded-lg p-5 shadow mb-5">

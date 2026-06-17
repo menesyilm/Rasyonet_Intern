@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="Rasyonet_Intern.API/Rasyonet_Intern.API.csproj" />
+  <Project Path="Rasyonet_Intern.Test/Rasyonet_Intern.Test.csproj" Id="0928e116-9540-46d8-ae6e-20401875af28" DisplayName="Rasyonet_Intern.TEST" />
 </Solution>

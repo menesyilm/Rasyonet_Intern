@@ -3,18 +3,61 @@ import NavigationButton from '../components/NavigationButton'
 import PieChart from '../components/PieChart'
 import BarChart from '../components/BarChart'
 import LineChart from '../components/LineChart'
-import { getChartData } from '../services/api'
+
+import {
+  getPurchaseMethodData,
+  getStoreLocationData,
+  getMonthlyTrendData
+} from '../services/api'
 
 function ChartsPage() {
-  const [chartData, setChartData] = useState([])
+  const [pieData, setPieData] = useState([])
+  const [barData, setBarData] = useState([])
+  const [lineData, setLineData] = useState([])
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    const fetchChartData = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getChartData()
-        setChartData(data)
+        setLoading(true)
+
+        const [
+          purchaseData,
+          storeData,
+          monthlyData
+        ] = await Promise.all([
+          getPurchaseMethodData(),
+          getStoreLocationData(),
+          getMonthlyTrendData()
+        ])
+
+        setPieData(
+          purchaseData.map(item => ({
+            category: item.purchaseMethod,
+            value: item.totalSales,
+            orderCount: item.orderCount
+          }))
+        )
+
+        setBarData(
+          storeData.map(item => ({
+            category: item.storeLocation,
+            value: item.totalSales,
+            orderCount: item.orderCount
+          }))
+        )
+
+        setLineData(
+          monthlyData.map(item => ({
+            period: item.period,
+            value: item.totalSales,
+            orderCount: item.orderCount
+          }))
+        )
+
+        setError(null)
       } catch (err) {
         console.error(err)
         setError(err.message)
@@ -23,7 +66,7 @@ function ChartsPage() {
       }
     }
 
-    fetchChartData()
+    fetchData()
   }, [])
 
   if (loading) {
@@ -37,7 +80,7 @@ function ChartsPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-100 p-5 text-red-500">
-        {error}
+        Hata: {error}
       </div>
     )
   }
@@ -55,11 +98,9 @@ function ChartsPage() {
         />
       </div>
 
-      <PieChart chartData={chartData} />
-
-      <BarChart chartData={chartData} />
-
-      <LineChart chartData={chartData} />
+      <PieChart chartData={pieData} />
+      <BarChart chartData={barData} />
+      <LineChart chartData={lineData} />
     </div>
   )
 }
