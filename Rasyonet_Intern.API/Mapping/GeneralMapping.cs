@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using Rasyonet_Intern.API.DTOs;
-using Rasyonet_Intern.API.Models;
 
 namespace Rasyonet_Intern.API.Mapping
 {
@@ -8,7 +6,6 @@ namespace Rasyonet_Intern.API.Mapping
     {
         public GeneralMapping()
         {
-            CreateMap<Performance, PerformanceDto>().ReverseMap();
         }
     }
 }

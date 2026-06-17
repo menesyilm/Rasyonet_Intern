@@ -21,5 +21,11 @@ namespace Rasyonet_Intern.API.Controllers
             var result = await _repository.GetAllAsync();
             return Ok(result);
         }
+        [HttpGet("chart")]
+        public async Task<IActionResult> GetChartData()
+        {
+            var result = await _repository.GetChartData();
+            return Ok(result);
+        }
     }
 }

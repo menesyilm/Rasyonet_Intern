@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import NavigationButton from '../components/NavigationButton'
 import SortButton from '../components/SortButton'
+import { getCategories } from '../services/api'
 
 function PerformancePage() {
   const [performanceData, setPerformanceData] = useState([])
@@ -17,20 +18,20 @@ function PerformancePage() {
       try {
         setLoading(true)
 
-        const response = await fetch('http://localhost:5010/api/categories')
-
-        if (!response.ok) {
-          throw new Error('Veri çekilemedi')
-        }
-
-        const data = await response.json()
+        const data = await getCategories()
 
         setPerformanceData(data)
 
         const categories = {}
 
         const uniqueCategories = [
-          ...new Set(data.map(item => item.categoryName || 'Kategori Yok'))
+          ...new Set(
+            data.map(
+              item =>
+                item.categoryName ||
+                'Kategori Yok'
+            )
+          )
         ]
 
         uniqueCategories.forEach(name => {
