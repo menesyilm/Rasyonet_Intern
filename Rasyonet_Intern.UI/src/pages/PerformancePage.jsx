@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import NavigationButton from '../components/NavigationButton'
+import SortButton from '../components/SortButton'
 
 function PerformancePage() {
   const [performanceData, setPerformanceData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [expandedCategories, setExpandedCategories] = useState({})
+  const [sortConfig, setSortConfig] = useState({
+  key: null,
+  direction: 'asc'
+})
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,6 +56,39 @@ function PerformancePage() {
       [categoryName]: !prev[categoryName]
     }))
   }
+
+  {/*sıralama fonksiyonu*/}
+  const handleSort = (key) => {
+    let direction = 'asc'
+
+    if (
+      sortConfig.key === key &&
+      sortConfig.direction === 'asc'
+    ) {
+      direction = 'desc'
+    }
+
+    setSortConfig({
+      key,
+      direction
+    })
+  }
+const getSortedPerformances = (performances) => {
+  if (!sortConfig.key) {
+    return performances
+  }
+
+  return [...performances].sort((a, b) => {
+    const aValue = a[sortConfig.key] ?? 0
+    const bValue = b[sortConfig.key] ?? 0
+
+    if (sortConfig.direction === 'asc') {
+      return aValue - bValue
+    }
+
+    return bValue - aValue
+  })
+}
 
   if (loading) {
     return (
@@ -101,23 +139,58 @@ function PerformancePage() {
               </th>
 
               <th className="py-1 px-[5px] text-left font-semibold text-gray-700">
-                Büyüklük
+                <div className="flex items-center gap-2">
+                  Büyüklük
+                  <SortButton
+                    column="value"
+                    sortConfig={sortConfig}
+                    onSort={handleSort}
+                  />
+                </div>
               </th>
 
               <th className="py-1 px-[5px] text-left font-semibold text-gray-700">
-                Fiyat
+                <div className="flex items-center gap-2">
+                  Fiyat
+                  <SortButton
+                    column="price"
+                    sortConfig={sortConfig}
+                    onSort={handleSort}
+                  />
+                </div>
               </th>
 
               <th className="py-1 px-[5px] text-left font-semibold text-gray-700">
-                Günlük (%)
+                <div className="flex items-center gap-2">
+                  Günlük (%)
+                  <SortButton
+                    column="dailyChange"
+                    sortConfig={sortConfig}
+                    onSort={handleSort}
+                  />
+                </div>
               </th>
 
               <th className="py-1 px-[5px] text-left font-semibold text-gray-700">
-                Haftalık (%)
+                <div className="flex items-center gap-2">
+                  Haftalık (%)
+                  <SortButton
+                    column="weeklyChange"
+                    sortConfig={sortConfig}
+                    onSort={handleSort}
+                  />
+                </div>
               </th>
 
               <th className="py-1 px-[5px] text-left font-semibold text-gray-700">
-                Aylık (%)
+                <div className="flex items-center gap-2">
+                  Aylık (%)
+                  <SortButton
+                    column="monthlyChange"
+                    sortConfig={sortConfig}
+                    onSort={handleSort}
+                  />
+                </div>
               </th>
             </tr>
           </thead>
@@ -158,7 +231,7 @@ function PerformancePage() {
       </tr>
 
       {expandedCategories[category.categoryName] &&
-        category.performances?.map(row => (
+        getSortedPerformances(category.performances).map(row => (
           <tr
             key={row.uniqueCode}
             className="border-b border-gray-200 h-[72px] hover:bg-gray-50"

@@ -89,7 +89,7 @@ function PieChart() {
           }}
         />
       )}
-
+      {/*Table view*/}
       {view === 'table' && (
         <table className="w-full border-collapse">
           <thead>
@@ -119,7 +119,7 @@ function PieChart() {
               </tr>
             ))}
 
-            <tr className="bg-gray-100 font-bold bg-black/80">
+            <tr className="bg-gray-100 font-bold bg-black/90">
               <td className="p-3 text-white">Toplam</td>
               <td className="p-3 text-right text-white">
                 %100.00
