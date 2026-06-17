@@ -1,12 +1,51 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import * as am5 from '@amcharts/amcharts5'
 import * as am5xy from '@amcharts/amcharts5/xy'
 
-function LineChart({ chartData }) {
+function LineChart() {
   const chartRef = useRef(null)
+  const [chartData, setChartData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
+  // Backend endpoint'ini çağır ve veriyi çek
   useLayoutEffect(() => {
-    if (!chartData.length) return
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch('http://localhost:5010/api/sales/chart/monthly-trend')
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const data = await response.json()
+
+        // Backend: { year, month, period, totalSales, orderCount }
+        // Chart beklediği: { date/period, value }
+        const mappedData = data.map(item => ({
+          period: item.period,              // X ekseni (tarih, "2015-01" formatında)
+          value: item.totalSales,           // Y ekseni (aylık toplam satış)
+          orderCount: item.orderCount       // Bonus bilgi
+        }))
+
+        setChartData(mappedData)
+        setError(null)
+      } catch (err) {
+        console.error('Veri çekme hatası:', err)
+        setError(err.message)
+        setChartData([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  // Chart render işlemi
+  useLayoutEffect(() => {
+    if (!chartData.length || !chartRef.current) return
 
     const root = am5.Root.new(chartRef.current)
 
@@ -16,17 +55,10 @@ function LineChart({ chartData }) {
 
     const xAxis = chart.xAxes.push(
       am5xy.CategoryAxis.new(root, {
-        categoryField: 'category',
+        categoryField: 'period',
         renderer: am5xy.AxisRendererX.new(root, {})
       })
     )
-
-    xAxis.get('renderer').labels.template.setAll({
-      rotation: -45,
-      centerY: am5.p50,
-      centerX: am5.p100,
-      paddingTop: 10
-    })
 
     const yAxis = chart.yAxes.push(
       am5xy.ValueAxis.new(root, {
@@ -38,22 +70,25 @@ function LineChart({ chartData }) {
       am5xy.LineSeries.new(root, {
         xAxis,
         yAxis,
-        categoryXField: 'category',
-        valueYField: 'value',
-        tooltip: am5.Tooltip.new(root, {
-          labelText: '{categoryX}: {valueY}'
-        })
+        categoryXField: 'period',
+        valueYField: 'value'
       })
     )
 
-    series.bullets.push(() => {
-      return am5.Bullet.new(root, {
-        sprite: am5.Circle.new(root, {
-          radius: 5,
-          fill: series.get('fill')
-        })
+    // Çizginin stilini ayarla
+    series.strokes.template.setAll({
+      strokeWidth: 2,
+      stroke: am5.color(0x3b82f6) // Mavi renk
+    })
+
+    // Veri noktaları (bullets)
+    const bullet = am5.Bullet.new(root, {
+      sprite: am5.Circle.new(root, {
+        radius: 5,
+        fill: am5.color(0x3b82f6)
       })
     })
+    series.bullets.push(() => bullet)
 
     xAxis.data.setAll(chartData)
     series.data.setAll(chartData)
@@ -63,10 +98,36 @@ function LineChart({ chartData }) {
     }
   }, [chartData])
 
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg p-5 shadow mb-5">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-5">
+          Aylık Satış Trendi
+        </h2>
+        <div className="flex justify-center items-center h-96">
+          <p className="text-gray-500">Yükleniyor...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg p-5 shadow mb-5">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-5">
+          Aylık Satış Trendi
+        </h2>
+        <div className="flex justify-center items-center h-96">
+          <p className="text-red-500">Hata: {error}</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="bg-white rounded-lg p-5 shadow">
+    <div className="bg-white rounded-lg p-5 shadow mb-5">
       <h2 className="text-2xl font-semibold text-gray-700 mb-5">
-        Fon Performans Değişimi
+        Aylık Satış Trendi
       </h2>
 
       <div
