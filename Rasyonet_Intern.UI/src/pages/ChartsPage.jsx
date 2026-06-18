@@ -1,81 +1,70 @@
 import { useEffect, useState } from 'react'
+import { getPurchaseMethodData, getStoreLocationData, getMonthlyTrendData } from '../services/api'
 import NavigationButton from '../components/NavigationButton'
 import PieChart from '../components/PieChart'
 import BarChart from '../components/BarChart'
 import LineChart from '../components/LineChart'
-
-import {
-  getPurchaseMethodData,
-  getStoreLocationData,
-  getMonthlyTrendData
-} from '../services/api'
 
 function ChartsPage() {
   const [pieData, setPieData] = useState([])
   const [barData, setBarData] = useState([])
   const [lineData, setLineData] = useState([])
 
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const [pieLoading, setPieLoading] = useState(true)
+  const [barLoading, setBarLoading] = useState(true)
+  const [lineLoading, setLineLoading] = useState(true)
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-
-        const [
-          purchaseData,
-          storeData,
-          monthlyData
-        ] = await Promise.all([
-          getPurchaseMethodData(),
-          getStoreLocationData(),
-          getMonthlyTrendData()
-        ])
-
+    getPurchaseMethodData()
+      .then(data => {
         setPieData(
-          purchaseData.map(item => ({
-            category: item.purchaseMethod,
-            value: item.totalSales,
-            orderCount: item.orderCount
+          data.map(item => ({
+            category: item.purchaseMethod, value: item.totalSales, orderCount: item.orderCount
           }))
         )
-
-        setBarData(
-          storeData.map(item => ({
-            category: item.storeLocation,
-            value: item.totalSales,
-            orderCount: item.orderCount
-          }))
-        )
-
-        setLineData(
-          monthlyData.map(item => ({
-            period: item.period,
-            value: item.totalSales,
-            orderCount: item.orderCount
-          }))
-        )
-
-        setError(null)
-      } catch (err) {
+      })
+      .catch(err => {
         console.error(err)
         setError(err.message)
-      } finally {
-        setLoading(false)
-      }
-    }
+      })
+      .finally(() => {
+        setPieLoading(false)
+      })
 
-    fetchData()
+    getStoreLocationData()
+      .then(data => {
+        setBarData(
+          data.map(item => ({
+            category: item.storeLocation, value: item.totalSales, orderCount: item.orderCount
+          }))
+        )
+      })
+      .catch(err => {
+        console.error(err)
+        setError(err.message)
+      })
+      .finally(() => {
+        setBarLoading(false)
+      })
+
+    getMonthlyTrendData()
+      .then(data => {
+        setLineData(
+          data.map(item => ({
+            period: item.period, value: item.totalSales, orderCount: item.orderCount
+          }))
+        )
+      })
+      .catch(err => {
+        console.error(err)
+        setError(err.message)
+      })
+      .finally(() => {
+        setLineLoading(false)
+      })
   }, [])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 p-5">
-        Loading...
-      </div>
-    )
-  }
 
   if (error) {
     return (
@@ -98,11 +87,21 @@ function ChartsPage() {
         />
       </div>
 
-      <PieChart chartData={pieData} />
-      <BarChart chartData={barData} />
-      <LineChart chartData={lineData} />
+      <PieChart
+        chartData={pieData}
+        isLoading={pieLoading}
+      />
+
+      <BarChart
+        chartData={barData}
+        isLoading={barLoading}
+      />
+
+      <LineChart
+        chartData={lineData}
+        isLoading={lineLoading}
+      />
     </div>
   )
 }
-
 export default ChartsPage

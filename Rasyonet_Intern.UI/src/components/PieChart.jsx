@@ -6,12 +6,12 @@ import {
   HiOutlineTableCells
 } from 'react-icons/hi2'
 
-function PieChart({ chartData }) {
+function PieChart({ chartData, isLoading }) {
   const chartRef = useRef(null)
   const [view, setView] = useState('pie')
 
-  // Chart render işlemi
   useLayoutEffect(() => {
+    if (isLoading) return
     if (!chartData.length || !chartRef.current) return
     if (view !== 'pie') return
 
@@ -37,7 +37,7 @@ function PieChart({ chartData }) {
     return () => {
       root.dispose()
     }
-  }, [view, chartData])
+  }, [view, chartData, isLoading])
 
   return (
     <div className="bg-white rounded-lg p-5 shadow mb-5">
@@ -75,83 +75,110 @@ function PieChart({ chartData }) {
         </div>
       </div>
 
-      {view === 'pie' && (
-        <div
-          ref={chartRef}
-          style={{
-            width: '100%',
-            height: '500px'
-          }}
-        />
-      )}
+      {isLoading ? (
+        <div className="h-[500px] flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+        </div>
+      ) : (
+        <>
+          {view === 'pie' && (
+            <div
+              ref={chartRef}
+              style={{
+                width: '100%',
+                height: '500px'
+              }}
+            />
+          )}
 
-      {view === 'table' && (
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b">
-              <th className="p-3 text-left text-black">
-                Ödeme Yöntemi
-              </th>
+          {view === 'table' && (
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b">
+                  <th className="p-3 text-left text-black">
+                    Ödeme Yöntemi
+                  </th>
 
-              <th className="p-3 text-right text-black">
-                Toplam Satış
-              </th>
+                  <th className="p-3 text-right text-black">
+                    Toplam Satış
+                  </th>
 
-              <th className="p-3 text-right text-black">
-                Sipariş Sayısı
-              </th>
-            </tr>
-          </thead>
+                  <th className="p-3 text-right text-black">
+                    Sipariş Sayısı
+                  </th>
+                </tr>
+              </thead>
 
-          <tbody>
-            {chartData.map(item => {
-              const total = chartData.reduce((sum, x) => sum + x.value, 0)
-              const percentage = ((item.value / total) * 100).toFixed(2)
+              <tbody>
+                {chartData.map(item => {
+                  const total = chartData.reduce(
+                    (sum, x) => sum + x.value,
+                    0
+                  )
 
-              return (
-                <tr
-                  key={item.category}
-                  className="border-b"
-                >
-                  <td className="p-3 text-gray-500">
-                    {item.category}
+                  const percentage = (
+                    (item.value / total) *
+                    100
+                  ).toFixed(2)
+
+                  return (
+                    <tr
+                      key={item.category}
+                      className="border-b"
+                    >
+                      <td className="p-3 text-gray-500">
+                        {item.category}
+                      </td>
+
+                      <td className="p-3 text-right text-gray-500">
+                        ₺
+                        {Number(item.value).toLocaleString(
+                          'tr-TR',
+                          {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                          }
+                        )}
+                      </td>
+
+                      <td className="p-3 text-right text-gray-500">
+                        {item.orderCount} (%{percentage})
+                      </td>
+                    </tr>
+                  )
+                })}
+
+                <tr className="font-bold bg-black/70">
+                  <td className="p-3 text-white">
+                    Toplam
                   </td>
 
-                  <td className="p-3 text-right text-gray-500">
-                    ₺{Number(item.value).toLocaleString('tr-TR', {
+                  <td className="p-3 text-right text-white">
+                    ₺
+                    {Number(
+                      chartData.reduce(
+                        (sum, x) => sum + x.value,
+                        0
+                      )
+                    ).toLocaleString('tr-TR', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2
                     })}
                   </td>
 
-                  <td className="p-3 text-right text-gray-500">
-                    {item.orderCount} (%{percentage})
+                  <td className="p-3 text-right text-white">
+                    {chartData.reduce(
+                      (sum, x) => sum + x.orderCount,
+                      0
+                    )}
                   </td>
                 </tr>
-              )
-            })}
-
-            <tr className="font-bold bg-black/70">
-              <td className="p-3 text-white">
-                Toplam
-              </td>
-
-              <td className="p-3 text-right text-white">
-                ₺{Number(chartData.reduce((sum, x) => sum + x.value, 0)).toLocaleString('tr-TR', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                })}
-              </td>
-
-              <td className="p-3 text-right text-white">
-                {chartData.reduce((sum, x) => sum + x.orderCount, 0)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </tbody>
+            </table>
+          )}
+        </>
       )}
     </div>
   )
 }
-
 export default PieChart

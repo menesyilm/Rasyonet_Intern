@@ -1,12 +1,12 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import * as am5 from '@amcharts/amcharts5'
 import * as am5xy from '@amcharts/amcharts5/xy'
 
-function BarChart({ chartData }) {
+function BarChart({ chartData, isLoading }) {
   const chartRef = useRef(null)
 
-  // Chart render işlemi
   useLayoutEffect(() => {
+    if (isLoading) return
     if (!chartData.length || !chartRef.current) return
 
     const root = am5.Root.new(chartRef.current)
@@ -43,7 +43,7 @@ function BarChart({ chartData }) {
     return () => {
       root.dispose()
     }
-  }, [chartData])
+  }, [chartData, isLoading])
 
   return (
     <div className="bg-white rounded-lg p-5 shadow mb-5">
@@ -51,13 +51,19 @@ function BarChart({ chartData }) {
         Mağaza Lokasyonuna Göre Satış
       </h2>
 
-      <div
-        ref={chartRef}
-        style={{
-          width: '100%',
-          height: '500px'
-        }}
-      />
+      {isLoading ? (
+        <div className="h-[500px] flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+        </div>
+      ) : (
+        <div
+          ref={chartRef}
+          style={{
+            width: '100%',
+            height: '500px'
+          }}
+        />
+      )}
     </div>
   )
 }

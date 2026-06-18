@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import * as am5 from '@amcharts/amcharts5'
 import * as am5xy from '@amcharts/amcharts5/xy'
 
-function LineChart({ chartData }) {
+function LineChart({ chartData, isLoading }) {
   const chartRef = useRef(null)
 
   // Chart render işlemi
@@ -66,13 +66,19 @@ function LineChart({ chartData }) {
         Aylık Satış Trendi
       </h2>
 
-      <div
-        ref={chartRef}
-        style={{
-          width: '100%',
-          height: '500px'
-        }}
-      />
+      {isLoading ? (
+        <div className="h-[500px] flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+        </div>
+      ) : (
+        <div
+          ref={chartRef}
+          style={{
+            width: '100%',
+            height: '500px'
+          }}
+        />
+      )}
     </div>
   )
 }
