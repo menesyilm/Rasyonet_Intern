@@ -1,8 +1,8 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import * as am5 from '@amcharts/amcharts5'
 import * as am5xy from '@amcharts/amcharts5/xy'
 
-function LineChart({ chartData, isLoading }) {
+function LineChart({ chartData, isLoading, error }) {
   const chartRef = useRef(null)
 
   // Chart render işlemi
@@ -69,6 +69,10 @@ function LineChart({ chartData, isLoading }) {
       {isLoading ? (
         <div className="h-[500px] flex justify-center items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+        </div>
+      ) : error ? (
+        <div className="h-[500px] flex justify-center items-center text-red-500">
+          Hata: {error}
         </div>
       ) : (
         <div
