@@ -4,10 +4,10 @@ import SortButton from '../components/SortButton'
 import { getCategories } from '../services/api'
 
 function PerformancePage() {
+  const [dataLoaded, setDataLoaded] = useState(false)
   const [performanceData, setPerformanceData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [dataLoaded, setDataLoaded] = useState(false)
   const [expandedCategories, setExpandedCategories] = useState({})
   const [sortConfig, setSortConfig] = useState({
     key: null,
@@ -226,8 +226,8 @@ function PerformancePage() {
                     <div className="flex items-center gap-[10px]">
                       <span
                         className={`inline-block text-[12px] transition-transform duration-300 ${expandedCategories[category.categoryName]
-                            ? 'rotate-90'
-                            : ''
+                          ? 'rotate-90'
+                          : ''
                           }`}
                       >
                         ▶

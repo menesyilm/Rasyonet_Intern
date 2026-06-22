@@ -1,4 +1,8 @@
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Extensions.DiagnosticSources;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Rasyonet_Intern.API.Data;
 using Rasyonet_Intern.API.Repositories.Implementations;
 using Rasyonet_Intern.API.Repositories.Interfaces;
@@ -11,9 +15,19 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 //MongoDB Bağlantısı
-var mongoClient = new MongoClient(
+//MongoClient'i düz oluşturmak yerine OpenTelemetry'nin MongoDB'yi izleyebilmesi için
+//DiagnosticsActivityEventSubscriber kullanarak MongoClientSettings oluşturuyoruz.
+var mongoClientSettings = MongoClientSettings.FromConnectionString(
     builder.Configuration["MongoDbSettings:ConnectionString"]);
+
+mongoClientSettings.ClusterConfigurator = cb =>
+{
+    cb.Subscribe(new DiagnosticsActivityEventSubscriber());
+};
+
+var mongoClient = new MongoClient(mongoClientSettings);
 
 var database = mongoClient.GetDatabase(
     builder.Configuration["MongoDbSettings:DatabaseName"]);
@@ -38,7 +52,20 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
-
+// OpenTelemetry
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing
+        .SetResourceBuilder(
+            ResourceBuilder.CreateDefault()
+                .AddService("Rasyonet_Intern.API"))
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources")
+        .AddOtlpExporter(opt =>
+        {
+            opt.Endpoint = new Uri("http://localhost:4317");
+            opt.Protocol = OtlpExportProtocol.Grpc;
+        }));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
