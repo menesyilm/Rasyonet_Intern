@@ -30,25 +30,42 @@ namespace Rasyonet_Intern.API.Repositories.Implementations
         {
             var pipeline = new[]
             {
+                //items bir array. ve $unwind, array’i parçalar.
                 new BsonDocument("$unwind", "$items"),
+                //$group mağaza lokasyonuna göre grupluyor.
                 new BsonDocument("$group", new BsonDocument
                 {
+                    //Gruplama anahtarı -> MongoDB’de $group içinde gruplama alanı _id ile belirtilir.
                     { "_id", "$storeLocation" },
+                    //Her item için price * quantity hesapla, sonra bunları lokasyon bazında topla.
+                    //örneğin :
+                    //London: 100 * 2 = 200
+                    //50 * 1 = 50
+                    //20 * 5 = 100
+                    //totalSales = 350
+                    //Yani bu satır: SUM(items.price * items.quantity) anlamına gelir.
                     { "totalSales", new BsonDocument("$sum",
                         new BsonDocument("$multiply", new BsonArray { "$items.price", "$items.quantity" })) },
+                    //Sipariş sayısı hesaplama
                     { "orderCount", new BsonDocument("$addToSet", "$_id") }
                 }),
+                //$project, sonucu şekillendirme aşamasıdır.
                 new BsonDocument("$project", new BsonDocument
                 {
+                    //_id alanını storeLocation yapma
                     { "storeLocation", "$_id" },
+                    // totalSales alanını olduğu gibi bırak
                     { "totalSales", 1 },
+                    // Sipariş setinin boyutunu alma
                     { "orderCount", new BsonDocument("$size", "$orderCount") }
                 }),
+                //Azalan sırada sıralama yapar. -1 azalan, 1 artan
                 new BsonDocument("$sort", new BsonDocument("totalSales", -1))
             };
-
+            //pipeline'ı MongoDB üzerinde çalıştırma
+            //Veriyi aggregation pipeline ile işler. Ayrıca aggregation = birleştirme 
             var result = await _salesCollection.Aggregate<BsonDocument>(pipeline).ToListAsync();
-
+            //Mongo sonucunu DTO’ya çevirme
             return result.Select(doc => new StoreLocationSalesDto
             {
                 StoreLocation = doc["storeLocation"].AsString,
@@ -75,6 +92,7 @@ namespace Rasyonet_Intern.API.Repositories.Implementations
                     { "totalSales", 1 },
                     { "orderCount", new BsonDocument("$size", "$orderCount") }
                 }),
+                //Azalan sırada sıralama yapar. -1 azalan, 1 artan
                 new BsonDocument("$sort", new BsonDocument("totalSales", -1))
             };
 
@@ -112,6 +130,7 @@ namespace Rasyonet_Intern.API.Repositories.Implementations
                     { "totalSales", 1 },
                     { "orderCount", new BsonDocument("$size", "$orderCount") }
                 }),
+                //yılı ve ayı artan sırada sıralama yapar. -1 azalan, 1 artan
                 new BsonDocument("$sort", new BsonDocument { { "year", 1 }, { "month", 1 } })
             };
 

@@ -6,10 +6,12 @@ using Rasyonet_Intern.API.Repositories.Implementations;
 
 namespace Rasyonet_Intern.Test.IntegrationTests
 {
+    //Smoke Test nedir?
+    //Smoke test, sistemin detaylı doğru çalışıp çalışmadığını değil, temel olarak ayağa kalkıp kalkmadığını kontrol eder.
     public class SaleRepositoryIntegrationTests
     {
         //Local MongoDB bağlantı adresi.
-        //Burada gerçek MongoDB server'a bağlanıyoruz ve mock kullanmıyoruz.
+        //Burada gerçek MongoDB server'a bağlanıyoruz.
         private const string ConnectionString = "mongodb://localhost:27017";
 
         //Test için oluşturulacak geçici database adı.
@@ -28,7 +30,7 @@ namespace Rasyonet_Intern.Test.IntegrationTests
         public async Task SetUp()
         {
             // Guid.NewGuid(): benzersiz değer üretir. 
-            _databaseName = $"Rasyonet_Intern_Test_{Guid.NewGuid():N}";
+            _databaseName = $"Rasyonet_Intern_Test_{Guid.NewGuid():N}"; 
 
             // Gerçek MongoDB client oluşturuluyor.
             _mongoClient = new MongoClient(ConnectionString);
@@ -79,7 +81,7 @@ namespace Rasyonet_Intern.Test.IntegrationTests
             // Istanbul ve Ankara
             // Bu yüzden repository sonucunda da 2 grup bekliyoruz.
             Assert.That(result, Has.Count.EqualTo(2));
-
+            //Decimal -> 250(m)
             Assert.That(istanbul.TotalSales, Is.EqualTo(250m));
             Assert.That(istanbul.OrderCount, Is.EqualTo(2));
             Assert.That(ankara.TotalSales, Is.EqualTo(80m));
