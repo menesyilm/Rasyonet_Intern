@@ -1,7 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Rasyonet_Intern.API.Data;
-using Rasyonet_Intern.API.Models;
+using Rasyonet_Intern.API.Documents;
 using Rasyonet_Intern.API.Repositories.Implementations;
 
 namespace Rasyonet_Intern.Test.IntegrationTests
@@ -13,7 +13,7 @@ namespace Rasyonet_Intern.Test.IntegrationTests
         private string _databaseName = string.Empty;
         private MongoClient _mongoClient = null!;
         private SaleRepository _repository = null!;
-        private List<Sale> _testSales = new();
+        private List<SaleDocument> _testSales = new();
 
         [SetUp]
         public async Task SetUp()
@@ -72,9 +72,9 @@ namespace Rasyonet_Intern.Test.IntegrationTests
             }
         }
 
-        private static List<Sale> CreateTestSales()
+        private static List<SaleDocument> CreateTestSales()
         {
-            return new List<Sale>
+            return new List<SaleDocument>
             {
                 new()
                 {
@@ -82,14 +82,14 @@ namespace Rasyonet_Intern.Test.IntegrationTests
                     SaleDate = new DateTime(2026, 1, 10),
                     StoreLocation = "Istanbul",
                     PurchaseMethod = "Online",
-                    Customer = new SaleCustomer
+                    Customer = new SaleCustomerDocument
                     {
                         Gender = "Female",
                         Age = 25,
                         Email = "customer1@test.com",
                         Satisfaction = 5
                     },
-                    Items = new List<SaleItem>
+                    Items = new List<SaleItemDocument>
                     {
                         new()
                         {
@@ -106,14 +106,14 @@ namespace Rasyonet_Intern.Test.IntegrationTests
                     SaleDate = new DateTime(2026, 1, 15),
                     StoreLocation = "Istanbul",
                     PurchaseMethod = "In store",
-                    Customer = new SaleCustomer
+                    Customer = new SaleCustomerDocument
                     {
                         Gender = "Male",
                         Age = 31,
                         Email = "customer2@test.com",
                         Satisfaction = 4
                     },
-                    Items = new List<SaleItem>
+                    Items = new List<SaleItemDocument>
                     {
                         new()
                         {
@@ -130,14 +130,14 @@ namespace Rasyonet_Intern.Test.IntegrationTests
                     SaleDate = new DateTime(2026, 2, 5),
                     StoreLocation = "Ankara",
                     PurchaseMethod = "Online",
-                    Customer = new SaleCustomer
+                    Customer = new SaleCustomerDocument
                     {
                         Gender = "Female",
                         Age = 29,
                         Email = "customer3@test.com",
                         Satisfaction = 5
                     },
-                    Items = new List<SaleItem>
+                    Items = new List<SaleItemDocument>
                     {
                         new()
                         {

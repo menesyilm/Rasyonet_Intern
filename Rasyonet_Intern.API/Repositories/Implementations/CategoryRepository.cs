@@ -1,22 +1,21 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using Rasyonet_Intern.API.Data;
 using Rasyonet_Intern.API.DTOs;
-using Rasyonet_Intern.API.Models;
+using Rasyonet_Intern.API.Documents;
 using Rasyonet_Intern.API.Repositories.Interfaces;
 
 namespace Rasyonet_Intern.API.Repositories.Implementations
 {
     public class CategoryRepository : ICategoryRepository
     {
-        private readonly IMongoCollection<Category> _categoryCollection;
+        private readonly IMongoCollection<CategoryDocument> _categoryCollection;
 
         public CategoryRepository(MongoDbContext context)
         {
             _categoryCollection = context.Categories;
         }
 
-        public async Task<List<Category>> GetAllAsync()
+        public async Task<List<CategoryDocument>> GetAllAsync()
         {
             return await _categoryCollection.Find(_ => true).ToListAsync();
         }
@@ -32,7 +31,7 @@ namespace Rasyonet_Intern.API.Repositories.Implementations
 
             return result;
         }
-       
+
 
     }
 }

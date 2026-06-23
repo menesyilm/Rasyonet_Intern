@@ -1,14 +1,14 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Rasyonet_Intern.API.Models
+namespace Rasyonet_Intern.API.Documents
 {
-    public class Category
+    public class CategoryDocument
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public ObjectId Id { get; set; }
         public string CategoryName { get; set; } = string.Empty;
-         public List<Performance> Performances { get; set; } = new();
+        public List<PerformanceDocument> Performances { get; set; } = new();
     }
 }

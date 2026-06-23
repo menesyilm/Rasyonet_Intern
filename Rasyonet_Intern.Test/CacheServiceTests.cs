@@ -1,10 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Rasyonet_Intern.API.Controllers;
-using Rasyonet_Intern.API.DTOs;
-using Rasyonet_Intern.API.Repositories.Interfaces;
 using Rasyonet_Intern.API.Service;
 
 namespace Rasyonet_Intern.Test

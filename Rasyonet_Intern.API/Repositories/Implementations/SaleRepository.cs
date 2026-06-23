@@ -2,25 +2,25 @@
 using MongoDB.Driver;
 using Rasyonet_Intern.API.Data;
 using Rasyonet_Intern.API.DTOs;
-using Rasyonet_Intern.API.Models;
+using Rasyonet_Intern.API.Documents;
 using Rasyonet_Intern.API.Repositories.Interfaces;
 
 namespace Rasyonet_Intern.API.Repositories.Implementations
 {
     public class SaleRepository : ISaleRepository
     {
-        private readonly IMongoCollection<Sale> _salesCollection;
+        private readonly IMongoCollection<SaleDocument> _salesCollection;
         public SaleRepository(MongoDbContext context)
         {
             _salesCollection = context.Sales;
         }
         // Implement other methods as needed
-        public async Task<List<Sale>> GetAllAsync()
+        public async Task<List<SaleDocument>> GetAllAsync()
         {
             return await _salesCollection.Find(_ => true).ToListAsync();
         }
 
-        public async Task<Sale> GetByIdAsync(string id)
+        public async Task<SaleDocument> GetByIdAsync(string id)
         {
             return await _salesCollection.Find(s => s.Id == id).FirstOrDefaultAsync();
         }

@@ -1,8 +1,8 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 
-namespace Rasyonet_Intern.API.Models
+namespace Rasyonet_Intern.API.Documents
 {
-    public class SaleItem
+    public class SaleItemDocument
     {
         [BsonElement("name")]
         public string Name { get; set; } = string.Empty;

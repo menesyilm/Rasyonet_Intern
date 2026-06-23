@@ -1,9 +1,9 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Rasyonet_Intern.API.Models
+namespace Rasyonet_Intern.API.Documents
 {
-    public class Sale
+    public class SaleDocument
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -13,13 +13,13 @@ namespace Rasyonet_Intern.API.Models
         public DateTime SaleDate { get; set; }
 
         [BsonElement("items")]
-        public List<SaleItem> Items { get; set; } = new();
+        public List<SaleItemDocument> Items { get; set; } = new();
 
         [BsonElement("storeLocation")]
         public string StoreLocation { get; set; } = string.Empty;
 
         [BsonElement("customer")]
-        public SaleCustomer Customer { get; set; } = new SaleCustomer();
+        public SaleCustomerDocument Customer { get; set; } = new SaleCustomerDocument();
 
         [BsonElement("couponUsed")]
         public bool CouponUsed { get; set; }

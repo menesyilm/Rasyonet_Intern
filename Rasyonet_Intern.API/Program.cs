@@ -1,9 +1,11 @@
+using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Extensions.DiagnosticSources;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Rasyonet_Intern.API.Data;
+using Rasyonet_Intern.API.Data.Sql;
 using Rasyonet_Intern.API.Repositories.Implementations;
 using Rasyonet_Intern.API.Repositories.Interfaces;
 using Rasyonet_Intern.API.Service;
@@ -15,7 +17,13 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+//Sql Connection
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    var connectionString = builder.Configuration["SqlDbSettings:ConnectionString"];
 
+    options.UseSqlServer(connectionString);
+});
 //MongoDB Bağlantısı
 //MongoClient'i düz oluşturmak yerine OpenTelemetry'nin MongoDB'yi izleyebilmesi için
 //DiagnosticsActivityEventSubscriber kullanarak MongoClientSettings oluşturuyoruz.
