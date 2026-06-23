@@ -10,5 +10,9 @@ namespace Rasyonet_Intern.API.Documents
         public ObjectId Id { get; set; }
         public string CategoryName { get; set; } = string.Empty;
         public List<PerformanceDocument> Performances { get; set; } = new();
+
+        //MSSQL'den MongoDB'ye yazarken duplicate olmaması için.
+        [BsonElement("sqlId")]
+        public int SqlId { get; set; }
     }
 }

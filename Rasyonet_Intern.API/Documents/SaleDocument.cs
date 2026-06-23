@@ -26,5 +26,9 @@ namespace Rasyonet_Intern.API.Documents
 
         [BsonElement("purchaseMethod")]
         public string PurchaseMethod { get; set; } = string.Empty;
+
+        //MSSQL'den MongoDB'ye yazarken duplicate olmaması için.
+        [BsonElement("sqlId")]
+        public int SqlId { get; set; }
     }
 }

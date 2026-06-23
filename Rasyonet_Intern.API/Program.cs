@@ -4,11 +4,14 @@ using MongoDB.Driver.Core.Extensions.DiagnosticSources;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Quartz;
 using Rasyonet_Intern.API.Data;
 using Rasyonet_Intern.API.Data.Sql;
+using Rasyonet_Intern.API.Jobs;
 using Rasyonet_Intern.API.Repositories.Implementations;
 using Rasyonet_Intern.API.Repositories.Interfaces;
 using Rasyonet_Intern.API.Service;
+using Rasyonet_Intern.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,9 +50,27 @@ builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);
 // Repositories
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
+// DataMigrationService
+builder.Services.AddScoped<DataMigrationService>();
+builder.Services.AddScoped<SqlToMongoSyncService>();
 // MemoryCache
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<CacheService>();
+// Quartz -> MSSQL'den MongoDB'ye her gün 10:00'da senkrozinasyon
+builder.Services.AddQuartz(options =>
+{
+    var jobKey = new JobKey("SqlToMongoSyncJob");
+
+    options.AddJob<SqlToMongoSyncJob>(job => job.WithIdentity(jobKey));
+    options.AddTrigger(trigger => trigger
+        .ForJob(jobKey)
+        .WithIdentity("SqlToMongoSyncJobTrigger")
+        .WithCronSchedule("0 0 10 ? * *", cron => cron.InTimeZone(TimeZoneInfo.Local)));
+});
+builder.Services.AddQuartzHostedService(options =>
+{
+    options.WaitForJobsToComplete = true;
+});
 // CORS ayarları
 builder.Services.AddCors(options =>
 {
@@ -75,7 +96,20 @@ builder.Services.AddOpenTelemetry()
             opt.Protocol = OtlpExportProtocol.Grpc;
         }));
 var app = builder.Build();
+// MongoDB'den MSSQL'e veri aktarımı için
+if (args.Contains("--migrate-mongo-to-sql"))
+{
+    using var scope = app.Services.CreateScope();
 
+    var migrationService = scope.ServiceProvider
+        .GetRequiredService<DataMigrationService>();
+
+    await migrationService.MigrateMongoToSqlAsync();
+
+    Console.WriteLine("MongoDB verileri MSSQL'e aktarıldı.");
+
+    return;
+}
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
