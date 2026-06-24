@@ -1,6 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Rasyonet_Intern.API.Service;
+using Rasyonet_Intern.API.Services.Cache;
 
 namespace Rasyonet_Intern.API.Services.BackgroundServices
 {

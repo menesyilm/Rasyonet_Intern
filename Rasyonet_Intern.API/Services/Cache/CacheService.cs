@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 
-namespace Rasyonet_Intern.API.Service
+namespace Rasyonet_Intern.API.Services.Cache
 {
     public class CacheService
     {
@@ -26,11 +26,11 @@ namespace Rasyonet_Intern.API.Service
 
                 _cache.Set(key, value, options);
 
-                _logger.LogInformation("{Key} MongoDB'den geldi ve cache'e eklendi.",key);
+                _logger.LogInformation("{Key} MongoDB'den geldi ve cache'e eklendi.", key);
             }
             else
             {
-                _logger.LogInformation("{Key} cache'den geldi.",key);
+                _logger.LogInformation("{Key} cache'den geldi.", key);
             }
 
             return value!;

@@ -10,9 +10,9 @@ using Rasyonet_Intern.API.Data.Sql;
 using Rasyonet_Intern.API.Jobs;
 using Rasyonet_Intern.API.Repositories.Implementations;
 using Rasyonet_Intern.API.Repositories.Interfaces;
-using Rasyonet_Intern.API.Service;
 using Rasyonet_Intern.API.Services;
 using Rasyonet_Intern.API.Services.BackgroundServices;
+using Rasyonet_Intern.API.Services.Cache;
 
 var builder = WebApplication.CreateBuilder(args);
 

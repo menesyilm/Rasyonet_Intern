@@ -1,4 +1,4 @@
-namespace Rasyonet_Intern.API.Service
+namespace Rasyonet_Intern.API.Services.Cache
 {
     public class CacheInvalidationService
     {

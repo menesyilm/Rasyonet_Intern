@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Rasyonet_Intern.API.Services.Cache;
 using Moq;
-using Rasyonet_Intern.API.Service;
 
 namespace Rasyonet_Intern.Test
 {
@@ -16,7 +16,7 @@ namespace Rasyonet_Intern.Test
             // Testin çalışması için tüm nesneleri oluşturuyoruz..
             var memoryCache = new MemoryCache(new MemoryCacheOptions());
             var loggerMock = new Mock<ILogger<CacheService>>();
-            var service = new CacheService(memoryCache,loggerMock.Object);
+            var service = new CacheService(memoryCache, loggerMock.Object);
 
             int callCount = 0;
 

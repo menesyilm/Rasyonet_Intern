@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Rasyonet_Intern.API.Repositories.Interfaces;
-using Rasyonet_Intern.API.Service;
+using Rasyonet_Intern.API.Services.Cache;
 
 namespace Rasyonet_Intern.API.Controllers
 {
