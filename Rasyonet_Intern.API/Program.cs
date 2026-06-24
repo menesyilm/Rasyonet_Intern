@@ -12,14 +12,17 @@ using Rasyonet_Intern.API.Repositories.Implementations;
 using Rasyonet_Intern.API.Repositories.Interfaces;
 using Rasyonet_Intern.API.Service;
 using Rasyonet_Intern.API.Services;
+using Rasyonet_Intern.API.Services.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+//Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+//Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+//MongoDB Mongo Change Watcher Service
+builder.Services.AddHostedService<MongoChangeWatcher>(); //AddhostedService -> Uygulama ayağa kalkınca MongoChangeWatcher otomatik başlasın.
 //Sql Connection
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -55,7 +58,8 @@ builder.Services.AddScoped<DataMigrationService>();
 builder.Services.AddScoped<SqlToMongoSyncService>();
 // MemoryCache
 builder.Services.AddMemoryCache();
-builder.Services.AddScoped<CacheService>();
+builder.Services.AddSingleton<CacheService>();
+builder.Services.AddSingleton<CacheInvalidationService>();
 // Quartz -> MSSQL'den MongoDB'ye her gün 10:00'da senkrozinasyon
 builder.Services.AddQuartz(options =>
 {
@@ -100,14 +104,10 @@ var app = builder.Build();
 if (args.Contains("--migrate-mongo-to-sql"))
 {
     using var scope = app.Services.CreateScope();
-
     var migrationService = scope.ServiceProvider
         .GetRequiredService<DataMigrationService>();
-
     await migrationService.MigrateMongoToSqlAsync();
-
     Console.WriteLine("MongoDB verileri MSSQL'e aktarıldı.");
-
     return;
 }
 // Configure the HTTP request pipeline.

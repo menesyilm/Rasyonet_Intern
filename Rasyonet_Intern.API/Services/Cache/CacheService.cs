@@ -21,8 +21,7 @@ namespace Rasyonet_Intern.API.Service
 
                 var options = new MemoryCacheEntryOptions
                 {
-                    AbsoluteExpirationRelativeToNow =
-                        TimeSpan.FromMinutes(10)
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
                 };
 
                 _cache.Set(key, value, options);
@@ -35,6 +34,12 @@ namespace Rasyonet_Intern.API.Service
             }
 
             return value!;
+        }
+
+        public void Remove(string key)
+        {
+            _cache.Remove(key);
+            _logger.LogInformation("{Key} cache'den silindi.", key);
         }
     }
 }

@@ -34,11 +34,7 @@ namespace Rasyonet_Intern.API.Controllers
         [HttpGet("chart/by-store-location")]
         public async Task<IActionResult> GetByStoreLocation()
         {
-            var result =
-                await _cacheService.GetOrSetAsync(
-                    "StoreLocationChart",
-                    () => _repository.GetSalesByStoreLocationAsync());
-
+            var result = await _cacheService.GetOrSetAsync(CacheKeys.StoreLocationChart, () => _repository.GetSalesByStoreLocationAsync());
             return Ok(result);
         }
 
@@ -46,11 +42,7 @@ namespace Rasyonet_Intern.API.Controllers
         [HttpGet("chart/by-purchase-method")]
         public async Task<IActionResult> GetByPurchaseMethod()
         {
-            var result =
-                await _cacheService.GetOrSetAsync(
-                    "PurchaseMethodChart",
-                    () => _repository.GetSalesByPurchaseMethodAsync());
-
+            var result = await _cacheService.GetOrSetAsync(CacheKeys.PurchaseMethodChart, () => _repository.GetSalesByPurchaseMethodAsync());
             return Ok(result);
         }
 
@@ -58,11 +50,7 @@ namespace Rasyonet_Intern.API.Controllers
         [HttpGet("chart/monthly-trend")]
         public async Task<IActionResult> GetMonthlyTrend()
         {
-            var result =
-                await _cacheService.GetOrSetAsync(
-                    "MonthlyTrendChart",
-                    () => _repository.GetMonthlySalesTrendAsync());
-
+            var result = await _cacheService.GetOrSetAsync(CacheKeys.MonthlyTrendChart, () => _repository.GetMonthlySalesTrendAsync());
             return Ok(result);
         }
     }
