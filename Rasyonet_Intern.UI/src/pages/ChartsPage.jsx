@@ -5,6 +5,7 @@ import NavigationButton from '../components/NavigationButton'
 import PieChart from '../components/PieChart'
 import BarChart from '../components/BarChart'
 import LineChart from '../components/LineChart'
+import SignalRStatusBadge from '../components/SignalRStatusBadge'
 
 function ChartsPage() {
   const [pieData, setPieData] = useState([])
@@ -18,9 +19,11 @@ function ChartsPage() {
   const [pieLoading, setPieLoading] = useState(true)
   const [barLoading, setBarLoading] = useState(true)
   const [lineLoading, setLineLoading] = useState(true)
+  const [signalRStatus, setSignalRStatus] = useState('connecting')
 
   const isActiveRef = useRef(true)
   const refreshTimeoutRef = useRef(null)
+  const reconnectTimeoutRef = useRef(null)
 
   const retryDelay = 2000
   const timeout = 15000
@@ -125,11 +128,49 @@ function ChartsPage() {
     return () => {
       isActiveRef.current = false
       clearTimeout(refreshTimeoutRef.current)
+      clearTimeout(reconnectTimeoutRef.current)
     }
   }, [loadAllCharts])
 
   useEffect(() => {
     const connection = createDashboardConnection()
+    let isConnectionActive = true
+    let isStarting = false
+    const retryConnectionDelay = 3000
+
+    const scheduleReconnect = () => {
+      clearTimeout(reconnectTimeoutRef.current)
+
+      reconnectTimeoutRef.current = setTimeout(() => {
+        if (isConnectionActive) {
+          startConnection()
+        }
+      }, retryConnectionDelay)
+    }
+
+    const startConnection = async () => {
+      if (!isConnectionActive || isStarting) return
+
+      try {
+        isStarting = true
+        setSignalRStatus('connecting')
+        await connection.start()
+
+        if (isConnectionActive) {
+          setSignalRStatus('connected')
+          loadAllCharts({ showLoading: false })
+        }
+      } catch (error) {
+        console.error('SignalR bağlantı hatası:', error)
+
+        if (isConnectionActive) {
+          setSignalRStatus('disconnected')
+          scheduleReconnect()
+        }
+      } finally {
+        isStarting = false
+      }
+    }
 
     connection.on('salesChartsInvalidated', () => {
       clearTimeout(refreshTimeoutRef.current)
@@ -139,18 +180,32 @@ function ChartsPage() {
       }, 500)
     })
 
-    const startConnection = async () => {
-      try {
-        await connection.start()
-      } catch (error) {
-        console.error('SignalR bağlantı hatası:', error)
+    connection.onreconnecting(() => {
+      if (isConnectionActive) {
+        setSignalRStatus('reconnecting')
       }
-    }
+    })
+
+    connection.onreconnected(() => {
+      if (isConnectionActive) {
+        setSignalRStatus('connected')
+        loadAllCharts({ showLoading: false })
+      }
+    })
+
+    connection.onclose(() => {
+      if (isConnectionActive) {
+        setSignalRStatus('disconnected')
+        scheduleReconnect()
+      }
+    })
 
     startConnection()
 
     return () => {
+      isConnectionActive = false
       clearTimeout(refreshTimeoutRef.current)
+      clearTimeout(reconnectTimeoutRef.current)
       connection.off('salesChartsInvalidated')
       connection.stop()
     }
@@ -163,10 +218,14 @@ function ChartsPage() {
           Grafikler
         </h1>
 
-        <NavigationButton
-          to="/"
-          text="Performans Sayfası"
-        />
+        <div className="flex items-center gap-3">
+          <SignalRStatusBadge status={signalRStatus} />
+
+          <NavigationButton
+            to="/"
+            text="Performans Sayfası"
+          />
+        </div>
       </div>
 
       <PieChart
