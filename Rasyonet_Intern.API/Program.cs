@@ -7,6 +7,7 @@ using OpenTelemetry.Trace;
 using Quartz;
 using Rasyonet_Intern.API.Data;
 using Rasyonet_Intern.API.Data.Sql;
+using Rasyonet_Intern.API.Hubs;
 using Rasyonet_Intern.API.Jobs;
 using Rasyonet_Intern.API.Repositories.Implementations;
 using Rasyonet_Intern.API.Repositories.Interfaces;
@@ -75,14 +76,18 @@ builder.Services.AddQuartzHostedService(options =>
 {
     options.WaitForJobsToComplete = true;
 });
+// SignalR
+builder.Services.AddSignalR();
 // CORS ayarları
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy
+            .WithOrigins("http://localhost:5173") // React adresi
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 // OpenTelemetry
@@ -124,5 +129,7 @@ app.UseCors("AllowReactApp");
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<DashboardHub>("/hubs/dashboard").RequireCors("AllowReactApp");
 
 app.Run();

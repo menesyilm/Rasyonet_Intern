@@ -8,14 +8,20 @@ import {
 
 function PieChart({ chartData, isLoading, error }) {
   const chartRef = useRef(null)
+  const rootRef = useRef(null)
+  const seriesRef = useRef(null)
+
   const [view, setView] = useState('pie')
 
   useLayoutEffect(() => {
     if (isLoading) return
-    if (!chartData.length || !chartRef.current) return
+    if (error) return
+    if (!chartRef.current) return
     if (view !== 'pie') return
+    if (rootRef.current) return
 
     const root = am5.Root.new(chartRef.current)
+    rootRef.current = root
 
     const chart = root.container.children.push(
       am5percent.PieChart.new(root, {})
@@ -32,12 +38,23 @@ function PieChart({ chartData, isLoading, error }) {
       text: '%{valuePercentTotal.formatNumber("#.00")}'
     })
 
-    series.data.setAll(chartData)
+    seriesRef.current = series
 
     return () => {
       root.dispose()
+      rootRef.current = null
+      seriesRef.current = null
     }
-  }, [view, chartData, isLoading])
+  }, [view, isLoading, error])
+
+  useLayoutEffect(() => {
+    if (isLoading) return
+    if (error) return
+    if (view !== 'pie') return
+    if (!seriesRef.current) return
+
+    seriesRef.current.data.setAll(chartData)
+  }, [chartData, view, isLoading, error])
 
   return (
     <div className="bg-white rounded-lg p-5 shadow mb-5">
@@ -185,4 +202,5 @@ function PieChart({ chartData, isLoading, error }) {
     </div>
   )
 }
+
 export default PieChart

@@ -4,12 +4,18 @@ import * as am5xy from '@amcharts/amcharts5/xy'
 
 function BarChart({ chartData, isLoading, error }) {
   const chartRef = useRef(null)
+  const rootRef = useRef(null)
+  const xAxisRef = useRef(null)
+  const seriesRef = useRef(null)
 
   useLayoutEffect(() => {
     if (isLoading) return
-    if (!chartData.length || !chartRef.current) return
+    if (error) return
+    if (!chartRef.current) return
+    if (rootRef.current) return
 
     const root = am5.Root.new(chartRef.current)
+    rootRef.current = root
 
     const chart = root.container.children.push(
       am5xy.XYChart.new(root, {})
@@ -37,13 +43,26 @@ function BarChart({ chartData, isLoading, error }) {
       })
     )
 
-    xAxis.data.setAll(chartData)
-    series.data.setAll(chartData)
+    xAxisRef.current = xAxis
+    seriesRef.current = series
 
     return () => {
       root.dispose()
+      rootRef.current = null
+      xAxisRef.current = null
+      seriesRef.current = null
     }
-  }, [chartData, isLoading])
+  }, [isLoading, error])
+
+  useLayoutEffect(() => {
+    if (isLoading) return
+    if (error) return
+    if (!chartData.length) return
+    if (!xAxisRef.current || !seriesRef.current) return
+
+    xAxisRef.current.data.setAll(chartData)
+    seriesRef.current.data.setAll(chartData)
+  }, [chartData, isLoading, error])
 
   return (
     <div className="bg-white rounded-lg p-5 shadow mb-5">

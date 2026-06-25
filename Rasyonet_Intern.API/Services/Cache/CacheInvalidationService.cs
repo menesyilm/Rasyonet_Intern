@@ -12,21 +12,14 @@ namespace Rasyonet_Intern.API.Services.Cache
         }
 
         // MongoDB Change Stream tarafında bir collection değiştiğinde çağrılır.
-        public void InvalidateForCollection(string collectionName)
+        public void InvalidateSalesCharts()
         {
-            // Eğer değişen collection Sales değilse hiçbir şey yapma.
-            if (collectionName != "Sales")
-            {
-                return;
-            }
-
             // Sales collection değiştiyse, Sales verisine bağlı bütün chart cache key'lerini temizle.
             foreach (var key in CacheKeys.SalesChartKeys)
             {
                 _cacheService.Remove(key);
             }
-
-            _logger.LogInformation("{CollectionName} değiştiği için Sales chart cache'leri temizlendi.", collectionName);
+            _logger.LogInformation("Sales chart cache'leri temizlendi.");
         }
     }
 }

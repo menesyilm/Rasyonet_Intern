@@ -4,12 +4,19 @@ import * as am5xy from '@amcharts/amcharts5/xy'
 
 function LineChart({ chartData, isLoading, error }) {
   const chartRef = useRef(null)
+  const rootRef = useRef(null)
+  const xAxisRef = useRef(null)
+  const seriesRef = useRef(null)
 
   // Chart render işlemi
   useLayoutEffect(() => {
-    if (!chartData.length || !chartRef.current) return
+    if (isLoading) return
+    if (error) return
+    if (!chartRef.current) return
+    if (rootRef.current) return
 
     const root = am5.Root.new(chartRef.current)
+    rootRef.current = root
 
     const chart = root.container.children.push(
       am5xy.XYChart.new(root, {})
@@ -44,21 +51,34 @@ function LineChart({ chartData, isLoading, error }) {
     })
 
     // Veri noktaları (bullets)
-    const bullet = am5.Bullet.new(root, {
-      sprite: am5.Circle.new(root, {
-        radius: 5,
-        fill: am5.color(0x3b82f6)
+    series.bullets.push(() =>
+      am5.Bullet.new(root, {
+        sprite: am5.Circle.new(root, {
+          radius: 5,
+          fill: am5.color(0x3b82f6)
+        })
       })
-    })
-    series.bullets.push(() => bullet)
+    )
 
-    xAxis.data.setAll(chartData)
-    series.data.setAll(chartData)
+    xAxisRef.current = xAxis
+    seriesRef.current = series
 
     return () => {
       root.dispose()
+      rootRef.current = null
+      xAxisRef.current = null
+      seriesRef.current = null
     }
-  }, [chartData])
+  }, [isLoading, error])
+
+  useLayoutEffect(() => {
+    if (isLoading) return
+    if (error) return
+    if (!xAxisRef.current || !seriesRef.current) return
+
+    xAxisRef.current.data.setAll(chartData)
+    seriesRef.current.data.setAll(chartData)
+  }, [chartData, isLoading, error])
 
   return (
     <div className="bg-white rounded-lg p-5 shadow mb-5">
