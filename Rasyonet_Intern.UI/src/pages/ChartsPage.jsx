@@ -33,11 +33,15 @@ function ChartsPage() {
     mapData,
     setData,
     setLoading,
-    setError
+    setError,
+    showLoading = true
   }) => {
     const startedAt = Date.now()
 
-    setLoading(true)
+    if (showLoading) {
+      setLoading(true)
+    }
+
     setError(null)
 
     while (isActiveRef.current) {
@@ -47,15 +51,23 @@ function ChartsPage() {
         if (!isActiveRef.current) return
 
         setData(mapData(data))
-        setLoading(false)
+
+        if (showLoading) {
+          setLoading(false)
+        }
+
         return
       } catch (err) {
         if (Date.now() - startedAt >= timeout) {
           if (!isActiveRef.current) return
 
           console.error(err)
-          setError('Veri alinamadi. Lütfen sayfayı yenileyin.')
-          setLoading(false)
+
+          if (showLoading) {
+            setError('Veri alinamadi. Lütfen sayfayı yenileyin.')
+            setLoading(false)
+          }
+
           return
         }
 
@@ -64,7 +76,7 @@ function ChartsPage() {
     }
   }, [])
 
-  const loadAllCharts = useCallback(async () => {
+  const loadAllCharts = useCallback(async ({ showLoading = true } = {}) => {
     await Promise.all([
       loadChart({
         request: getPurchaseMethodData,
@@ -75,7 +87,8 @@ function ChartsPage() {
         })),
         setData: setPieData,
         setLoading: setPieLoading,
-        setError: setPieError
+        setError: setPieError,
+        showLoading
       }),
       loadChart({
         request: getStoreLocationData,
@@ -86,7 +99,8 @@ function ChartsPage() {
         })),
         setData: setBarData,
         setLoading: setBarLoading,
-        setError: setBarError
+        setError: setBarError,
+        showLoading
       }),
       loadChart({
         request: getMonthlyTrendData,
@@ -97,7 +111,8 @@ function ChartsPage() {
         })),
         setData: setLineData,
         setLoading: setLineLoading,
-        setError: setLineError
+        setError: setLineError,
+        showLoading
       })
     ])
   }, [loadChart])
@@ -105,7 +120,7 @@ function ChartsPage() {
   useEffect(() => {
     isActiveRef.current = true
 
-    loadAllCharts()
+    loadAllCharts({ showLoading: true })
 
     return () => {
       isActiveRef.current = false
@@ -116,23 +131,17 @@ function ChartsPage() {
   useEffect(() => {
     const connection = createDashboardConnection()
 
-    connection.on('salesChartsInvalidated', (event) => {
-      console.log('SignalR event geldi:', event)
-
+    connection.on('salesChartsInvalidated', () => {
       clearTimeout(refreshTimeoutRef.current)
 
       refreshTimeoutRef.current = setTimeout(() => {
-        loadAllCharts()
+        loadAllCharts({ showLoading: false })
       }, 500)
     })
 
     const startConnection = async () => {
       try {
-        console.log('SignalR bağlantısı başlatılıyor...')
-
         await connection.start()
-
-        console.log('SignalR bağlantısı kuruldu:', connection.connectionId)
       } catch (error) {
         console.error('SignalR bağlantı hatası:', error)
       }
@@ -141,6 +150,7 @@ function ChartsPage() {
     startConnection()
 
     return () => {
+      clearTimeout(refreshTimeoutRef.current)
       connection.off('salesChartsInvalidated')
       connection.stop()
     }
