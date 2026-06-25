@@ -134,10 +134,13 @@ function ChartsPage() {
 
   useEffect(() => {
     const connection = createDashboardConnection()
+    // Bu flag, component hâlâ ekranda mı kontrol etmek için.
     let isConnectionActive = true
+    // Aynı anda birden fazla connection.start() çağrılmasını engeller.
     let isStarting = false
+    // Manuel reconnect denemeleri arasındaki bekleme süresi.
     const retryConnectionDelay = 3000
-
+    // Bağlantı koparsa 3 saniye sonra yeniden bağlanmayı denemek için kullanılır.
     const scheduleReconnect = () => {
       clearTimeout(reconnectTimeoutRef.current)
 
@@ -148,23 +151,37 @@ function ChartsPage() {
       }, retryConnectionDelay)
     }
 
+    // SignalR bağlantısını gerçekten başlatan fonksiyon.
     const startConnection = async () => {
+      // Eğer component kapanmışsa veya zaten bağlantı başlatılıyorsa tekrar başlatma.
       if (!isConnectionActive || isStarting) return
 
       try {
         isStarting = true
+        // UI'daki SignalR badge "Bağlanıyor" durumuna geçer.
         setSignalRStatus('connecting')
+        // SignalR bağlantısı burada başlıyor.
+        // Dikkat: createDashboardConnection sadece connection nesnesi oluşturur.
+        // Gerçek bağlantı burada başlar.
         await connection.start()
 
         if (isConnectionActive) {
+          // Bağlantı başarılıysa badge "Connected" olur.
           setSignalRStatus('connected')
+          // Bağlantı kurulduktan sonra chart datasını sessizce yeniliyorsun.
+          //
+          // showLoading: false çok önemli.
+          // Çünkü loading true yapılırsa chart component spinner'a döner,
+          // chart DOM'dan kalkar ve amCharts yeniden oluşabilir.
           loadAllCharts({ showLoading: false })
         }
       } catch (error) {
         console.error('SignalR bağlantı hatası:', error)
 
         if (isConnectionActive) {
+          // Bağlantı kurulamadıysa status disconnected olur.
           setSignalRStatus('disconnected')
+          // 3 saniye sonra tekrar bağlanmayı dene.
           scheduleReconnect()
         }
       } finally {

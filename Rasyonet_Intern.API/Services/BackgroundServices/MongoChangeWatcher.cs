@@ -6,6 +6,9 @@ using Rasyonet_Intern.API.Services.Cache;
 
 namespace Rasyonet_Intern.API.Services.BackgroundServices
 {
+    // MongoChangeWatcher bir BackgroundService'tir.
+    // Yani API çalıştığı sürece arka planda sürekli çalışan bir servistir.
+    // Kullanıcının herhangi bir endpoint'e istek atmasına gerek kalmadan MongoDB değişikliklerini dinler.
     public class MongoChangeWatcher : BackgroundService
     {
         private readonly IMongoDatabase _mongoDatabase;
@@ -40,32 +43,44 @@ namespace Rasyonet_Intern.API.Services.BackgroundServices
                     //cursor.Current, MongoDB'den gelen mevcut değişiklik event'lerinin listesidir.
                     foreach (var changeEvent in cursor.Current)
                     {
+                        // Değişikliğin hangi collection üzerinde olduğunu alıyoruz.
                         var collectionName = changeEvent.CollectionNamespace.CollectionName;
+                        // Yapılan işlemin türünü alıyoruz. insert, update, delete, replace gibi.
                         var operationType = changeEvent.OperationType.ToString();
+                        // Değişen dokümanın ID'sini alıyoruz. BsonId
                         var documentId = GetDocumentId(changeEvent);
 
                         // Yakalanan değişikliği logla.
                         LogChange(changeEvent);
 
+                        //chart endpointleri sales collection'ında olduğu için sadece burası değişirse cache temizleme ve signalR event gönderme işlemi yapılır.
                         if (collectionName == "Sales")
                         {
-
-
                             // Hangi collection değiştiyse o collection'a bağlı cache key'lerini temizle.
                             _cacheInvalidationService.InvalidateSalesCharts();
 
-                            // SignalR hub'ına değişikliği bildir. 
+                            // SignalR ile frontend'e mesaj gönderiyoruz. 
                             await _hubContext.Clients.All.SendAsync("salesChartsInvalidated",
                             new
                             {
+                                // Hangi collection değişti?
                                 Collection = collectionName,
+                                // Ne tür işlem oldu?
                                 Operation = operationType,
+                                // Hangi document değişti?
                                 DocumentId = documentId,
+                                // Değişiklik zamanı.
                                 ChangedAt = DateTime.UtcNow
 
                             },
                             stoppingToken);
 
+                            // SignalR mesajı gönderildikten sonra bunu da logluyoruz.
+                            // Bu sayede akışı takip edebiliriz:
+                            //
+                            // 1. MongoDB değişikliği yakalandı mı?
+                            // 2. Cache temizlendi mi?
+                            // 3. SignalR event gönderildi mi?
                             _logger.LogInformation("SignalR event gönderildi: {EventName}, Collection: {CollectionName}, Operation: {OperationType}",
                                 "salesChartsInvalidated",
                                 collectionName,
@@ -99,14 +114,23 @@ namespace Rasyonet_Intern.API.Services.BackgroundServices
                 changeEvent.OperationType,
                 documentId);
         }
+
+        // Change Stream event'inden değişen document'in _id bilgisini almaya çalışır.
+        // static olmasının sebebi:
+        // Bu method sınıf içindeki field'ları kullanmıyor.
+        // Sadece kendisine verilen changeEvent üzerinden işlem yapıyor.
         private static string GetDocumentId(ChangeStreamDocument<BsonDocument> changeEvent)
         {
-            if (changeEvent.DocumentKey != null &&
-                changeEvent.DocumentKey.TryGetValue("_id", out var id))
+            // Change Stream event içinde DocumentKey varsa
+            // ve bu DocumentKey içinde "_id" alanı varsa onu almaya çalışıyoruz.
+            if (changeEvent.DocumentKey != null && changeEvent.DocumentKey.TryGetValue("_id", out var id))
             {
+                // id null değilse string'e çevir.
+                // Null ise "Unknown" dön.
                 return id?.ToString() ?? "Unknown";
             }
-
+            // Bazı event türlerinde document key beklediğimiz şekilde gelmeyebilir.
+            // Bu durumda hata fırlatmak yerine Unknown dönüyoruz.
             return "Unknown";
         }
     }

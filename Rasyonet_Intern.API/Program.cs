@@ -84,10 +84,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowReactApp", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173") // React adresi
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+            .WithOrigins("http://localhost:5173") // Frontend adresi
+            .AllowAnyHeader() // Frontend'in request header göndermesine izin verir.
+            .AllowAnyMethod() // Frontend'in farklı HTTP methodlarıyla istek atmasına izin verir.
+            .AllowCredentials(); // SignalR tarafında özellikle önemlidir.
+                                 // Cookie, authorization bilgisi veya bazı bağlantı bilgileri gerektiğinde
+                                 // browser'ın bunları göndermesine izin verir.
     });
 });
 // OpenTelemetry
