@@ -78,7 +78,7 @@ builder.Services.AddQuartzHostedService(options =>
 });
 // SignalR
 builder.Services.AddSignalR();
-// CORS ayarları
+// CORS ayarları -> Cross-Origin Resource Sharing
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
@@ -131,7 +131,7 @@ app.UseCors("AllowReactApp");
 app.UseAuthorization();
 
 app.MapControllers();
-
+// Bu satır backend’de SignalR endpoint açar -> Bu sadece bu Hub endpoint’i için CORS politikasını uygular.
 app.MapHub<DashboardHub>("/hubs/dashboard").RequireCors("AllowReactApp");
 
 app.Run();
