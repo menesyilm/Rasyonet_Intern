@@ -10,6 +10,5 @@ namespace Rasyonet_Intern.API.Hubs
     // MongoDB'de Sales değişince backend bu Hub üzerinden frontend'e haber verir.
     public class DashboardHub : Hub
     {
-
     }
 }

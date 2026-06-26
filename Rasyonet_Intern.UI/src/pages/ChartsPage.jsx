@@ -19,6 +19,8 @@ function ChartsPage() {
   const [pieLoading, setPieLoading] = useState(true)
   const [barLoading, setBarLoading] = useState(true)
   const [lineLoading, setLineLoading] = useState(true)
+
+  //Bağlantı durumu: connecting, connected, reconnecting, disconnected
   const [signalRStatus, setSignalRStatus] = useState('connecting')
 
   const isActiveRef = useRef(true)
@@ -37,6 +39,7 @@ function ChartsPage() {
     setData,
     setLoading,
     setError,
+    //yenilenme sorunu showloading ile çözüldü. showloading false olursa grafik loading ekranına dönmez.
     showLoading = true
   }) => {
     const startedAt = Date.now()
@@ -52,7 +55,7 @@ function ChartsPage() {
         const data = await request()
 
         if (!isActiveRef.current) return
-
+        //Veri şu satırda state’e yazılıyor:
         setData(mapData(data))
 
         if (showLoading) {
@@ -88,6 +91,7 @@ function ChartsPage() {
           value: item.totalSales,
           orderCount: item.orderCount
         })),
+        //Veri şu satırda state’e yazılıyor:
         setData: setPieData,
         setLoading: setPieLoading,
         setError: setPieError,
@@ -100,6 +104,7 @@ function ChartsPage() {
           value: item.totalSales,
           orderCount: item.orderCount
         })),
+        //Veri şu satırda state’e yazılıyor:
         setData: setBarData,
         setLoading: setBarLoading,
         setError: setBarError,
@@ -112,6 +117,7 @@ function ChartsPage() {
           value: item.totalSales,
           orderCount: item.orderCount
         })),
+        //Veri şu satırda state’e yazılıyor:
         setData: setLineData,
         setLoading: setLineLoading,
         setError: setLineError,
@@ -119,7 +125,7 @@ function ChartsPage() {
       })
     ])
   }, [loadChart])
-
+  //ilk veri çekimi yapılan yer ve loadAllChart fonksiyonu burada çağrılıyor. showLoading true olursa grafik loading ekranına döner.
   useEffect(() => {
     isActiveRef.current = true
 
@@ -170,9 +176,9 @@ function ChartsPage() {
           setSignalRStatus('connected')
           // Bağlantı kurulduktan sonra chart datasını sessizce yeniliyorsun.
           //
-          // showLoading: false çok önemli.
-          // Çünkü loading true yapılırsa chart component spinner'a döner,
-          // chart DOM'dan kalkar ve amCharts yeniden oluşabilir.
+          // 
+          // ÖNEMLİ ÇÖZÜM
+          // Bu durumda grafik datası sessizce yenilenir, ama grafik loading ekranına dönmez.
           loadAllCharts({ showLoading: false })
         }
       } catch (error) {
@@ -193,6 +199,10 @@ function ChartsPage() {
       clearTimeout(refreshTimeoutRef.current)
 
       refreshTimeoutRef.current = setTimeout(() => {
+        //
+        // 
+        // ÖNEMLİ ÇÖZÜM
+        // Bu durumda grafik datası sessizce yenilenir, ama grafik loading ekranına dönmez.
         loadAllCharts({ showLoading: false })
       }, 500)
     })
