@@ -1,5 +1,7 @@
-const CHART_BASE_URL = 'http://localhost:5010/api/Categories'
-const SALES_BASE_URL = 'http://localhost:5010/api/Sales/chart'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5010/api'
+
+const CHART_BASE_URL = `${API_BASE_URL}/Categories`
+const SALES_BASE_URL = `${API_BASE_URL}/Sales/chart`
 
 export const getCategories = async () => {
   const response = await fetch(

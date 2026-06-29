@@ -3,6 +3,7 @@
 // Backend tarafında:
 // DashboardHub : Hub
 import * as signalR from '@microsoft/signalr'
+const SIGNALR_URL = import.meta.env.VITE_SIGNALR_URL ?? 'http://localhost:5010/hubs/dashboard'
 
 // Neden fonksiyon olarak yazıyoruz?
 // Çünkü bağlantı oluşturma sorumluluğunu component'lerden ayırıyoruz.
@@ -10,7 +11,7 @@ import * as signalR from '@microsoft/signalr'
 export const createDashboardConnection = () => {
     return new signalR.HubConnectionBuilder()
         // Backend'deki SignalR Hub endpoint adresidir.
-        .withUrl('http://localhost:5010/hubs/dashboard')
+        .withUrl(SIGNALR_URL)
         // Bağlantı koparsa SignalR'ın otomatik tekrar bağlanmayı denemesini sağlar.
         // - API kısa süreliğine kapanıp açılırsa
         // - Network anlık koparsa

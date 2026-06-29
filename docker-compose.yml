@@ -1,0 +1,119 @@
+# Bu dosya birden fazla container'ı birlikte çalıştırmak için kullanılır.
+services:
+
+  # Backend servisi: ASP.NET Core Web API container'ı
+  backend:
+    build:
+      # Backend Dockerfile'ın bulunduğu klasör.
+      # Docker build komutu bu klasörü çalışma alanı olarak kullanır.
+      context: ./Rasyonet_Intern.API
+
+      # Bu build işlemi için hangi Dockerfile dosyası kullanılacak?
+      dockerfile: Dockerfile
+
+    # Oluşacak container'ın adı.
+    container_name: rasyonet-api
+
+    # Port eşleştirmesi:
+    # Sol taraf host makinenin portu ben dışarıdan hangi portla erişeceğim, sağ taraf container'ın portu.
+    #
+    # Host makine = kendi bilgisayarın.
+    # Container içindeki ASP.NET Core uygulaması 8080 portunu dinliyor.
+    #
+    # http://localhost:5010 -> container içindeki 8080 portuna yönlenir.
+    ports:
+      - "5010:8080"
+
+    # Backend container çalışırken kullanılacak environment variable'lar.
+    # Bunlar appsettings.json'daki bazı ayarları override eder.
+    environment:
+      # ASP.NET Core uygulamasını Development ortamında çalıştırıyoruz.
+      # Bu sayede Swagger gibi development özellikleri aktif kalır.
+      ASPNETCORE_ENVIRONMENT: Development
+
+      # Backend container içinde 8080 portunu dinlesin.
+      # + işareti tüm network interface'lerinden gelen istekleri kabul et demektir.
+      ASPNETCORE_URLS: http://+:8080
+
+      # Backend Docker içinde çalıştığı için localhost MongoDB'yi göstermez.
+      # localhost, backend container'ın kendisidir.
+      #
+      # MongoDB host makinede çalıştığı için host.docker.internal kullanıyoruz.
+      # Change Stream kullandığın için replicaSet=rs0 kalıyor.
+      MongoDbSettings__ConnectionString: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
+
+      # appsettings.json içindeki MongoDbSettings:DatabaseName değerini override eder.
+      MongoDbSettings__DatabaseName: Rasyonet_Intern
+
+    # Linux container'ın host.docker.internal adresini çözebilmesi için ek host tanımı.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    # Backend container'ın gerçekten sağlıklı olup olmadığını kontrol eder.
+    # Backend'in healthcheck'i
+    healthcheck:
+      # Buradaki localhost, host makine değil, backend container'ın kendisidir.
+      # Çünkü healthcheck komutu container içinde çalışır.
+      #
+      # curl ile container içindeki /health endpoint'ine istek atar.
+      # -f: HTTP 400/500 gibi hatalarda komutu başarısız sayar.
+      # -sS: Gereksiz çıktıyı azaltır ama hata varsa gösterir.
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1" ]
+
+      # Her 10 saniyede bir kontrol eder.
+      interval: 10s
+
+      # 5 saniye içinde cevap gelmezse başarısız sayar.
+      timeout: 5s
+
+      # Üst üste 5 defa başarısız olursa container unhealthy olur.
+      retries: 5
+
+      # Container ilk açılırken uygulamaya toparlanması için süre verir.
+      start_period: 20s
+
+  # Frontend servisi: React + Vite container'ı
+  frontend:
+    build:
+      # Frontend Dockerfile'ın bulunduğu klasör.
+      context: ./Rasyonet_Intern.UI
+
+      # Bu build işlemi için hangi Dockerfile dosyası kullanılacak?
+      dockerfile: Dockerfile
+
+    # Docker Desktop'ta "rasyonet-ui" olarak görünür.
+    container_name: rasyonet-ui
+
+    # Frontend port eşleştirmesi.
+    # Host makinedeki 5173 portu container içindeki 5173 portuna bağlanır.
+    ports:
+      - "5173:5173"
+
+    environment:
+      # React kodu browser'da çalıştığı için backend'e localhost:5010 üzerinden gider.
+      # Burada backend:8080 yazmıyoruz çünkü istek container içinden değil,
+      # kullanıcının tarayıcısından çıkıyor.
+      VITE_API_BASE_URL: http://localhost:5010/api
+
+      # SignalR Hub adresi.
+      # Backend tarafında app.MapHub<DashboardHub>("/hubs/dashboard") olduğu için bu path doğru.
+      VITE_SIGNALR_URL: http://localhost:5010/hubs/dashboard
+
+    # Frontend container'ı backend sadece "başladı" diye değil,
+    # backend healthcheck'ten geçtiğinde başlatılsın.
+    # Frontend'in healthcheck'i backend'in healthcheck'ine bağlıdır.
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    # Frontend container'ın gerçekten cevap verip vermediğini kontrol eder.
+    # Frontend'in healthcheck'i
+    healthcheck:
+      # Buradaki localhost, frontend container'ın kendisidir.
+      # Vite dev server container içinde 5173 portundan cevap veriyor mu?
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:5173 || exit 1" ]
+
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s

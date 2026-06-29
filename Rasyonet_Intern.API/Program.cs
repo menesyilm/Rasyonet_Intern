@@ -22,6 +22,11 @@ builder.Services.AddControllers();
 //Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+// Health Check servislerini DI container'a ekler.
+// Bu sayede uygulama içinde /health gibi bir endpoint açabiliriz.
+// İlk aşamada sadece uygulama ayakta mı kontrol edeceğiz.
+// MongoDB / MSSQL bağlantılarını ayrıca kontrol etmiyoruz.
+builder.Services.AddHealthChecks();
 //MongoDB Mongo Change Watcher Service
 builder.Services.AddHostedService<MongoChangeWatcher>(); //AddhostedService -> Uygulama ayağa kalkınca MongoChangeWatcher otomatik başlasın.
 //Sql Connection
@@ -123,14 +128,25 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
+// Local Docker ortamında uygulamayı HTTP üzerinden çalıştırıyoruz.
+// Health check de http://localhost:8080/health adresini kontrol edecek.
+// Development ortamında HTTPS redirect yaparsak Docker health check gereksiz sorun çıkarabilir.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors("AllowReactApp");
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Backend'in sağlık durumunu kontrol etmek için endpoint açıyoruz.
+// Docker Compose bu endpoint'e istek atacak.
+// Eğer API ayaktaysa genelde "Healthy" cevabı döner.
+app.MapHealthChecks("/health");
+
 // Bu satır backend’de SignalR endpoint açar -> Bu sadece bu Hub endpoint’i için CORS politikasını uygular.
 app.MapHub<DashboardHub>("/hubs/dashboard").RequireCors("AllowReactApp");
 
