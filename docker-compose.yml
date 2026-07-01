@@ -43,17 +43,16 @@ services:
       # Backend Docker içinde çalıştığı için localhost MongoDB'yi göstermez.
       # localhost, backend container'ın kendisidir.
       #
-      # MongoDB host makinede çalıştığı için host.docker.internal kullanıyoruz.
       # Change Stream kullandığın için replicaSet=rs0 kalıyor.
-      MongoDbSettings__ConnectionString: "mongodb://mongodb:27017/?replicaSet=rs0&directConnection=true"
+      MongoDbSettings__ConnectionString: "mongodb://mongodb:27017/?replicaSet=rs0"
       # appsettings.json içindeki MongoDbSettings:DatabaseName değerini override eder.
       MongoDbSettings__DatabaseName: Rasyonet_Intern
 
     depends_on:
       mssql:
-        condition: service_started
-      mongodb:
-        condition: service_started
+        condition: service_healthy
+      mongodb-init:
+        condition: service_completed_successfully
 
     # Linux container'ın host.docker.internal adresini çözebilmesi için ek host tanımı.
     extra_hosts:
@@ -194,6 +193,27 @@ services:
 
     # Container beklenmedik şekilde durursa tekrar başlatılır.
     restart: unless-stopped
+  mongodb-init:
+    image: mongo:7.0
+    container_name: rasyonet-mongodb-init
+
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+    command: >
+      mongosh --host mongodb:27017 --quiet --eval "try {
+        rs.status();
+      } catch (e) {
+        rs.initiate({
+          _id: 'rs0',
+          members: [
+            { _id: 0, host: 'mongodb:27017' }
+          ]
+        });
+      }"
+
+    restart: "no"
 
 # Bu kısım services'in içinde değil, root seviyede olmalı.
 # Burada yukarıda kullandığımız mssql_data volume'ünü tanımlıyoruz.

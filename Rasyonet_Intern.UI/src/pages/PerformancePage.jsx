@@ -135,15 +135,15 @@ function PerformancePage() {
         </div>
 
         {/* Küçük ekranlarda tablo sıkışmak yerine yatay kaydırılabilir olsun */}
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] border-collapse text-sm">
+        <div className="overflow-x-auto pb-2">
+          <table className="w-full min-w-[860px] border-separate border-spacing-0 text-sm">
             <thead className="bg-gray-50 border-b-2 border-gray-200">
               <tr>
-                <th className="py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700">
+                <th className="sticky left-0 z-30 min-w-[170px] w-[170px] sm:min-w-[240px] sm:w-[240px] py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700 bg-gray-50 border-b-2 border-gray-200 shadow-[6px_0_10px_-10px_rgba(15,23,42,0.9)]">
                   Fon Kodu
                 </th>
 
-                <th className="py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700">
+                <th className="min-w-[160px] py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700 border-b-2 border-gray-200">
                   <div className="flex items-center gap-2">
                     Büyüklük
                     <SortButton
@@ -154,7 +154,7 @@ function PerformancePage() {
                   </div>
                 </th>
 
-                <th className="py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700">
+                <th className="min-w-[120px] py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700 border-b-2 border-gray-200">
                   <div className="flex items-center gap-2">
                     Fiyat
                     <SortButton
@@ -165,7 +165,7 @@ function PerformancePage() {
                   </div>
                 </th>
 
-                <th className="py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700">
+                <th className="min-w-[120px] py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700 border-b-2 border-gray-200">
                   <div className="flex items-center gap-2">
                     Günlük (%)
                     <SortButton
@@ -176,7 +176,7 @@ function PerformancePage() {
                   </div>
                 </th>
 
-                <th className="py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700">
+                <th className="min-w-[130px] py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700 border-b-2 border-gray-200">
                   <div className="flex items-center gap-2">
                     Haftalık (%)
                     <SortButton
@@ -187,7 +187,7 @@ function PerformancePage() {
                   </div>
                 </th>
 
-                <th className="py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700">
+                <th className="min-w-[120px] py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700 border-b-2 border-gray-200">
                   <div className="flex items-center gap-2">
                     Aylık (%)
                     <SortButton
@@ -224,7 +224,7 @@ function PerformancePage() {
                     className="bg-green-100 font-semibold text-green-900 cursor-pointer border-b border-gray-200"
                     onClick={() => toggleCategory(category.categoryName)}
                   >
-                    <td className="py-3 sm:py-[15px] px-2 sm:px-[15px] text-sm sm:text-[15px]">
+                    <td className="sticky left-0 z-20 min-w-[170px] w-[170px] sm:min-w-[240px] sm:w-[240px] py-3 sm:py-[15px] px-2 sm:px-[15px] text-sm sm:text-[15px] bg-green-100 border-b border-gray-200 shadow-[6px_0_10px_-10px_rgba(15,23,42,0.9)]">
                       <div className="flex items-center gap-[10px]">
                         <span
                           className={`inline-block text-[12px] transition-transform duration-300 ${expandedCategories[category.categoryName]
@@ -239,16 +239,16 @@ function PerformancePage() {
                       </div>
                     </td>
 
-                    <td className="py-3 sm:py-[15px] px-2 sm:px-[15px] font-bold text-sm sm:text-[14px]">
+                    <td className="min-w-[160px] py-3 sm:py-[15px] px-2 sm:px-[15px] font-bold text-sm sm:text-[14px] border-b border-gray-200">
                       {category.performances
                         ?.reduce((sum, p) => sum + (p.value || 0), 0)
                         .toLocaleString('tr-TR')}
                     </td>
 
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    <td className="border-b border-gray-200"></td>
+                    <td className="border-b border-gray-200"></td>
+                    <td className="border-b border-gray-200"></td>
+                    <td className="border-b border-gray-200"></td>
                   </tr>
 
                   {expandedCategories[category.categoryName] &&
@@ -257,33 +257,33 @@ function PerformancePage() {
                         key={row.uniqueCode}
                         className="border-b border-gray-200 hover:bg-gray-50"
                       >
-                        <td className="py-2 px-2 sm:px-[5px] font-medium text-gray-800">
-                          <div className="mb-1 text-sm sm:text-[15px] truncate max-w-[220px] sm:max-w-[280px]">
+                        <td className="sticky left-0 z-10 min-w-[170px] w-[170px] sm:min-w-[240px] sm:w-[240px] py-2 px-2 sm:px-[5px] font-medium text-gray-800 bg-white border-b border-gray-200 shadow-[6px_0_10px_-10px_rgba(15,23,42,0.9)]">
+                          <div className="mb-1 text-sm sm:text-[15px] truncate max-w-[150px] sm:max-w-[220px]">
                             {row.uniqueCode}
                           </div>
 
-                          <div className="text-xs sm:text-[13px] text-gray-500 font-normal truncate max-w-[220px] sm:max-w-[280px]">
+                          <div className="text-xs sm:text-[13px] text-gray-500 font-normal truncate max-w-[150px] sm:max-w-[220px]">
                             {row.performanceName}
                           </div>
                         </td>
 
-                        <td className="py-2 px-2 sm:px-[5px] text-gray-600 font-mono">
+                        <td className="min-w-[160px] py-2 px-2 sm:px-[5px] text-gray-600 font-mono border-b border-gray-200">
                           {row.value?.toLocaleString('tr-TR') ?? '-'}
                         </td>
 
-                        <td className="py-2 px-2 sm:px-[5px] text-gray-600 font-mono">
+                        <td className="min-w-[120px] py-2 px-2 sm:px-[5px] text-gray-600 font-mono border-b border-gray-200">
                           {row.price?.toFixed(6) ?? '-'}
                         </td>
 
-                        <td className="py-2 px-2 sm:px-[5px] text-gray-600 font-mono">
+                        <td className="min-w-[120px] py-2 px-2 sm:px-[5px] text-gray-600 font-mono border-b border-gray-200">
                           {row.dailyChange?.toFixed(4) ?? '-'}
                         </td>
 
-                        <td className="py-2 px-2 sm:px-[5px] text-gray-600 font-mono">
+                        <td className="min-w-[130px] py-2 px-2 sm:px-[5px] text-gray-600 font-mono border-b border-gray-200">
                           {row.weeklyChange?.toFixed(4) ?? '-'}
                         </td>
 
-                        <td className="py-2 px-2 sm:px-[5px] text-gray-600 font-mono">
+                        <td className="min-w-[120px] py-2 px-2 sm:px-[5px] text-gray-600 font-mono border-b border-gray-200">
                           {row.monthlyChange?.toFixed(4) ?? '-'}
                         </td>
                       </tr>
