@@ -2,19 +2,6 @@
 
 Bu dosya, AI asistanların projeyi her açtığında bilmesi gereken sabit proje bilgisini tutar. Geçici not, şifre, token, API key veya connection string eklenmemelidir.
 
-## Kural: Proje Patterni Keşfedilince Önce Sor, Onaydan Sonra Yaz
-
-Çalışma sırasında Rasyonet_Intern projesine özgü yeni bir genel pattern, yapı veya mekanizma keşfedilirse AI kullanıcıya proaktif olarak sormalıdır: "Bu patterni memory.md'ye ekleyelim mi?"
-
-Amaç, kullanıcının onayı olmadan bu dosyaya yeni bilgi yazmamaktır. AI keşfettiği kalıcı bilgiyi fark ettiğinde kendisi sormalı, kullanıcının "ekleyelim", "evet", "olur" gibi açık onayını beklemelidir.
-
-Nasıl uygulanır:
-
-- Sprint veya geliştirme sırasında projeye özgü bir pattern fark edilirse sor: "Şunu fark ettim, bunu memory.md'ye eklemek ister misin? Pattern: [pattern adı] - [1 cümle özet]"
-- Örnek pattern konuları: DB schema yaklaşımı, config değişikliği, naming convention, runtime kuralı, layer arası kontrat, cache invalidation yaklaşımı, SignalR event standardı, test stratejisi, Docker çalışma kuralı.
-- Kullanıcı onay verirse `memory.md` içinde uygun section'a kısa ve kalıcı bir not olarak ekle.
-- Kullanıcı reddederse, kararsız kalırsa veya bilginin sprint-spesifik/geçici olduğunu söylerse `memory.md`'ye yazma; bilgiyi konuşmada bırak.
-
 ## Projenin Amacı
 
 Rasyonet_Intern, satış ve kategori verilerini yöneten bir dashboard uygulamasıdır. Backend API, MongoDB ve MSSQL verilerini kullanarak satış/kategori verilerini ve grafik endpointlerini sunar. Frontend, performans tablosu ve satış grafiklerini gösterir; MongoDB değişikliklerinde SignalR ile chart verilerini anlık yeniler.
