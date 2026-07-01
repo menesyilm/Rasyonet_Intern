@@ -123,9 +123,9 @@ function PerformancePage() {
 
   return (
     <div className="min-h-screen bg-gray-100 w-full">
-      <div className="w-full bg-white p-[5px]">
-        <div className="flex justify-between items-center mb-5">
-          <h1 className="text-4xl font-medium text-green-600 m-4">
+      <div className="w-full bg-white p-2 sm:p-[5px]">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5 px-2 sm:px-0">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-medium text-green-600 m-0 sm:m-4">
             Performans
           </h1>
           <NavigationButton
@@ -134,162 +134,165 @@ function PerformancePage() {
           />
         </div>
 
-        <table className="w-full border-collapse text-sm table-fixed">
-          <thead className="bg-gray-50 border-b-2 border-gray-200">
-            <tr>
-              <th className="py-1 px-[5px] text-left font-semibold text-gray-700">
-                Fon Kodu
-              </th>
-
-              <th className="py-1 px-[5px] text-left font-semibold text-gray-700">
-                <div className="flex items-center gap-2">
-                  Büyüklük
-                  <SortButton
-                    column="value"
-                    sortConfig={sortConfig}
-                    onSort={handleSort}
-                  />
-                </div>
-              </th>
-
-              <th className="py-1 px-[5px] text-left font-semibold text-gray-700">
-                <div className="flex items-center gap-2">
-                  Fiyat
-                  <SortButton
-                    column="price"
-                    sortConfig={sortConfig}
-                    onSort={handleSort}
-                  />
-                </div>
-              </th>
-
-              <th className="py-1 px-[5px] text-left font-semibold text-gray-700">
-                <div className="flex items-center gap-2">
-                  Günlük (%)
-                  <SortButton
-                    column="dailyChange"
-                    sortConfig={sortConfig}
-                    onSort={handleSort}
-                  />
-                </div>
-              </th>
-
-              <th className="py-1 px-[5px] text-left font-semibold text-gray-700">
-                <div className="flex items-center gap-2">
-                  Haftalık (%)
-                  <SortButton
-                    column="weeklyChange"
-                    sortConfig={sortConfig}
-                    onSort={handleSort}
-                  />
-                </div>
-              </th>
-
-              <th className="py-1 px-[5px] text-left font-semibold text-gray-700">
-                <div className="flex items-center gap-2">
-                  Aylık (%)
-                  <SortButton
-                    column="monthlyChange"
-                    sortConfig={sortConfig}
-                    onSort={handleSort}
-                  />
-                </div>
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {loading ? (
+        {/* Küçük ekranlarda tablo sıkışmak yerine yatay kaydırılabilir olsun */}
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] border-collapse text-sm">
+            <thead className="bg-gray-50 border-b-2 border-gray-200">
               <tr>
-                <td colSpan="6">
-                  <div className="h-[500px] flex justify-center items-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+                <th className="py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700">
+                  Fon Kodu
+                </th>
+
+                <th className="py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700">
+                  <div className="flex items-center gap-2">
+                    Büyüklük
+                    <SortButton
+                      column="value"
+                      sortConfig={sortConfig}
+                      onSort={handleSort}
+                    />
                   </div>
-                </td>
-              </tr>
-            ) : error ? (
-              <tr>
-                <td
-                  colSpan="6"
-                  className="h-[500px] text-center text-red-500"
-                >
-                  Hata: {error}
-                </td>
-              </tr>
-            ) : performanceData.map(category => (
-              <React.Fragment key={category.id?.timestamp}>
-                <tr
-                  className="bg-green-100 font-semibold text-green-900 cursor-pointer border-b border-gray-200"
-                  onClick={() => toggleCategory(category.categoryName)}
-                >
-                  <td className="py-[15px] px-[15px] text-[15px]">
-                    <div className="flex items-center gap-[10px]">
-                      <span
-                        className={`inline-block text-[12px] transition-transform duration-300 ${expandedCategories[category.categoryName]
-                          ? 'rotate-90'
-                          : ''
-                          }`}
-                      >
-                        ▶
-                      </span>
+                </th>
 
-                      {category.categoryName}
+                <th className="py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700">
+                  <div className="flex items-center gap-2">
+                    Fiyat
+                    <SortButton
+                      column="price"
+                      sortConfig={sortConfig}
+                      onSort={handleSort}
+                    />
+                  </div>
+                </th>
+
+                <th className="py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700">
+                  <div className="flex items-center gap-2">
+                    Günlük (%)
+                    <SortButton
+                      column="dailyChange"
+                      sortConfig={sortConfig}
+                      onSort={handleSort}
+                    />
+                  </div>
+                </th>
+
+                <th className="py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700">
+                  <div className="flex items-center gap-2">
+                    Haftalık (%)
+                    <SortButton
+                      column="weeklyChange"
+                      sortConfig={sortConfig}
+                      onSort={handleSort}
+                    />
+                  </div>
+                </th>
+
+                <th className="py-2 px-2 sm:px-[5px] text-left font-semibold text-gray-700">
+                  <div className="flex items-center gap-2">
+                    Aylık (%)
+                    <SortButton
+                      column="monthlyChange"
+                      sortConfig={sortConfig}
+                      onSort={handleSort}
+                    />
+                  </div>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="6">
+                    <div className="h-[300px] sm:h-[400px] lg:h-[500px] flex justify-center items-center">
+                      <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-500" />
                     </div>
                   </td>
-
-                  <td className="py-[15px] px-[15px] font-bold text-[14px]">
-                    {category.performances
-                      ?.reduce((sum, p) => sum + (p.value || 0), 0)
-                      .toLocaleString('tr-TR')}
-                  </td>
-
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
                 </tr>
+              ) : error ? (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="h-[300px] sm:h-[400px] lg:h-[500px] text-center text-red-500"
+                  >
+                    Hata: {error}
+                  </td>
+                </tr>
+              ) : performanceData.map(category => (
+                <React.Fragment key={category.id?.timestamp}>
+                  <tr
+                    className="bg-green-100 font-semibold text-green-900 cursor-pointer border-b border-gray-200"
+                    onClick={() => toggleCategory(category.categoryName)}
+                  >
+                    <td className="py-3 sm:py-[15px] px-2 sm:px-[15px] text-sm sm:text-[15px]">
+                      <div className="flex items-center gap-[10px]">
+                        <span
+                          className={`inline-block text-[12px] transition-transform duration-300 ${expandedCategories[category.categoryName]
+                            ? 'rotate-90'
+                            : ''
+                            }`}
+                        >
+                          ▶
+                        </span>
 
-                {expandedCategories[category.categoryName] &&
-                  getSortedPerformances(category.performances).map(row => (
-                    <tr
-                      key={row.uniqueCode}
-                      className="border-b border-gray-200 h-[72px] hover:bg-gray-50"
-                    >
-                      <td className="py-1 px-[5px] font-medium text-gray-800">
-                        <div className="w-[280px] mb-1 text-[15px]">
-                          {row.uniqueCode}
-                        </div>
+                        {category.categoryName}
+                      </div>
+                    </td>
 
-                        <div className="text-[13px] text-gray-500 font-normal">
-                          {row.performanceName}
-                        </div>
-                      </td>
+                    <td className="py-3 sm:py-[15px] px-2 sm:px-[15px] font-bold text-sm sm:text-[14px]">
+                      {category.performances
+                        ?.reduce((sum, p) => sum + (p.value || 0), 0)
+                        .toLocaleString('tr-TR')}
+                    </td>
 
-                      <td className="py-1 px-[5px] text-gray-600 font-mono">
-                        {row.value?.toLocaleString('tr-TR') ?? '-'}
-                      </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
 
-                      <td className="py-1 px-[5px] text-gray-600 font-mono">
-                        {row.price?.toFixed(6) ?? '-'}
-                      </td>
+                  {expandedCategories[category.categoryName] &&
+                    getSortedPerformances(category.performances).map(row => (
+                      <tr
+                        key={row.uniqueCode}
+                        className="border-b border-gray-200 hover:bg-gray-50"
+                      >
+                        <td className="py-2 px-2 sm:px-[5px] font-medium text-gray-800">
+                          <div className="mb-1 text-sm sm:text-[15px] truncate max-w-[220px] sm:max-w-[280px]">
+                            {row.uniqueCode}
+                          </div>
 
-                      <td className="py-1 px-[5px] text-gray-600 font-mono">
-                        {row.dailyChange?.toFixed(4) ?? '-'}
-                      </td>
+                          <div className="text-xs sm:text-[13px] text-gray-500 font-normal truncate max-w-[220px] sm:max-w-[280px]">
+                            {row.performanceName}
+                          </div>
+                        </td>
 
-                      <td className="py-1 px-[5px] text-gray-600 font-mono">
-                        {row.weeklyChange?.toFixed(4) ?? '-'}
-                      </td>
+                        <td className="py-2 px-2 sm:px-[5px] text-gray-600 font-mono">
+                          {row.value?.toLocaleString('tr-TR') ?? '-'}
+                        </td>
 
-                      <td className="py-1 px-[5px] text-gray-600 font-mono">
-                        {row.monthlyChange?.toFixed(4) ?? '-'}
-                      </td>
-                    </tr>
-                  ))}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
+                        <td className="py-2 px-2 sm:px-[5px] text-gray-600 font-mono">
+                          {row.price?.toFixed(6) ?? '-'}
+                        </td>
+
+                        <td className="py-2 px-2 sm:px-[5px] text-gray-600 font-mono">
+                          {row.dailyChange?.toFixed(4) ?? '-'}
+                        </td>
+
+                        <td className="py-2 px-2 sm:px-[5px] text-gray-600 font-mono">
+                          {row.weeklyChange?.toFixed(4) ?? '-'}
+                        </td>
+
+                        <td className="py-2 px-2 sm:px-[5px] text-gray-600 font-mono">
+                          {row.monthlyChange?.toFixed(4) ?? '-'}
+                        </td>
+                      </tr>
+                    ))}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

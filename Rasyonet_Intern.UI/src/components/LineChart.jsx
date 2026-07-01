@@ -81,26 +81,23 @@ function LineChart({ chartData, isLoading, error }) {
   }, [chartData, isLoading, error])
 
   return (
-    <div className="bg-white rounded-lg p-5 shadow mb-5">
-      <h2 className="text-2xl font-semibold text-gray-700 mb-5">
+    <div className="bg-white rounded-lg p-3 sm:p-5 shadow mb-5">
+      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-700 mb-3 sm:mb-5">
         Aylık Satış Trendi
       </h2>
 
       {isLoading ? (
-        <div className="h-[500px] flex justify-center items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+        <div className="h-[280px] sm:h-[380px] lg:h-[450px] flex justify-center items-center">
+          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-500" />
         </div>
       ) : error ? (
-        <div className="h-[500px] flex justify-center items-center text-red-500">
+        <div className="h-[280px] sm:h-[380px] lg:h-[450px] flex justify-center items-center text-red-500 text-center px-2">
           Hata: {error}
         </div>
       ) : (
         <div
           ref={chartRef}
-          style={{
-            width: '100%',
-            height: '500px'
-          }}
+          className="w-full h-[280px] sm:h-[380px] lg:h-[450px]"
         />
       )}
     </div>

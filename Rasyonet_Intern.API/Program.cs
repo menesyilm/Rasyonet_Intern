@@ -32,9 +32,13 @@ builder.Services.AddHostedService<MongoChangeWatcher>(); //AddhostedService -> U
 //Sql Connection
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    var connectionString = builder.Configuration["SqlDbSettings:ConnectionString"];
-
-    options.UseSqlServer(connectionString);
+    options.UseSqlServer(
+        builder.Configuration["SqlDbSettings:ConnectionString"],
+        sqlOptions =>
+        {
+            //SQL Server container ayağa kalkarken backend bazen daha erken bağlanmaya çalışabilir.
+            sqlOptions.EnableRetryOnFailure();
+        });
 });
 //MongoDB Bağlantısı
 //MongoClient'i düz oluşturmak yerine OpenTelemetry'nin MongoDB'yi izleyebilmesi için

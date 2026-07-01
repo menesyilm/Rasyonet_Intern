@@ -238,14 +238,16 @@ function ChartsPage() {
     }
   }, [loadAllCharts])
 
+  // ... importlar aynı
+
   return (
-    <div className="min-h-screen bg-gray-100 p-5">
-      <div className="flex justify-between items-center mb-5">
-        <h1 className="text-4xl font-medium text-green-600">
+    <div className="min-h-screen bg-gray-100 p-3 sm:p-5">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-medium text-green-600">
           Grafikler
         </h1>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <SignalRStatusBadge status={signalRStatus} />
 
           <NavigationButton
@@ -255,23 +257,27 @@ function ChartsPage() {
         </div>
       </div>
 
-      <PieChart
-        chartData={pieData}
-        isLoading={pieLoading}
-        error={pieError}
-      />
+      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-5">
+        <PieChart
+          chartData={pieData}
+          isLoading={pieLoading}
+          error={pieError}
+        />
 
-      <BarChart
-        chartData={barData}
-        isLoading={barLoading}
-        error={barError}
-      />
+        <BarChart
+          chartData={barData}
+          isLoading={barLoading}
+          error={barError}
+        />
 
-      <LineChart
-        chartData={lineData}
-        isLoading={lineLoading}
-        error={lineError}
-      />
+        <div className="lg:col-span-2">
+          <LineChart
+            chartData={lineData}
+            isLoading={lineLoading}
+            error={lineError}
+          />
+        </div>
+      </div>
     </div>
   )
 }

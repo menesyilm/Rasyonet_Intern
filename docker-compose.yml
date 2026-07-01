@@ -31,6 +31,11 @@ services:
       # Bu sayede Swagger gibi development özellikleri aktif kalır.
       ASPNETCORE_ENVIRONMENT: Development
 
+      # MSSQL
+      # Bunu eklerken appsettings.json kalmalı mı? sorusu -> evet kalmalı çünkü localde çalışırken
+      # windows authentication kullanmaya devam edelim diye.
+      SqlDbSettings__ConnectionString: "Server=mssql,1433;Database=Rasyonet_Intern;User Id=sa;Password=Rasyonet123!;TrustServerCertificate=True;Encrypt=False;"
+
       # Backend container içinde 8080 portunu dinlesin.
       # + işareti tüm network interface'lerinden gelen istekleri kabul et demektir.
       ASPNETCORE_URLS: http://+:8080
@@ -40,10 +45,15 @@ services:
       #
       # MongoDB host makinede çalıştığı için host.docker.internal kullanıyoruz.
       # Change Stream kullandığın için replicaSet=rs0 kalıyor.
-      MongoDbSettings__ConnectionString: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
-
+      MongoDbSettings__ConnectionString: "mongodb://mongodb:27017/?replicaSet=rs0&directConnection=true"
       # appsettings.json içindeki MongoDbSettings:DatabaseName değerini override eder.
       MongoDbSettings__DatabaseName: Rasyonet_Intern
+
+    depends_on:
+      mssql:
+        condition: service_started
+      mongodb:
+        condition: service_started
 
     # Linux container'ın host.docker.internal adresini çözebilmesi için ek host tanımı.
     extra_hosts:
@@ -117,3 +127,77 @@ services:
       timeout: 5s
       retries: 5
       start_period: 20s
+
+  mssql:
+    # MSSQL için Dockerfile yazmıyoruz çünkü Microsoft'un resmi image'ını kullanıyoruz.
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: rasyonet-mssql
+    environment:
+      # Microsoft SQL Server lisans sözleşmesini kabul ettiğimizi belirtir.
+      ACCEPT_EULA: "Y"
+      # Docker içindeki MSSQL'de Windows Authentication kullanmıyoruz.
+      # Bunun yerine SQL Authentication kullanıyoruz.
+      MSSQL_SA_PASSWORD: "Rasyonet123!"
+      # SQL Server edition seçimi.
+      # Developer edition geliştirme ortamı için ücretsiz ve yeterlidir.
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+      # Volume kullanmamızın sebebi veritabanı verilerini kalıcı hale getirmek.
+      # Eğer volume kullanmazsak container silindiğinde SQL Server içindeki veriler de gider.
+      # mssql_data              -> Docker volume adı
+      # /var/opt/mssql          -> SQL Server'ın container içinde veri tuttuğu klasör
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+    # $${MSSQL_SA_PASSWORD} yazmamızın sebebi:
+    # Docker Compose'un değişkeni host tarafında değil,
+    # container içinde çözmesini istememiz.
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q \"SELECT 1\" || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+    restart: unless-stopped
+
+  # MongoDB servisi
+  # Bu container, uygulamadaki Sales / Categories gibi document collection'larını tutacak.
+  # Ayrıca MongoChangeWatcher içindeki WatchAsync çalışabilsin diye replica set olarak açılıyor.
+  mongodb:
+    # MongoDB için hazır resmi image kullanıyoruz.
+    # MSSQL'de olduğu gibi burada da Dockerfile yazmamıza gerek yok.
+    image: mongo:7.0
+    container_name: rasyonet-mongodb
+
+    # Replica set config içinde bu hostname'i kullanacağız.
+    # Backend container MongoDB'ye "mongodb:27017" adresiyle ulaşacak.
+    hostname: mongodb
+    # MongoDB'yi normal standalone modda değil,
+    # rs0 isimli replica set olarak başlatıyoruz.
+    command: [ "mongod", "--replSet", "rs0", "--bind_ip_all" ]
+    ports:
+      - "27017:27017"
+
+    volumes:
+      # MongoDB verilerini kalıcı hale getirmek için volume kullanıyoruz.
+      - mongodb_data:/data/db
+
+    # MongoDB ayağa kalktı mı diye bakar.
+    healthcheck:
+      test: [ "CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand('ping').ok\" | grep 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+    # Container beklenmedik şekilde durursa tekrar başlatılır.
+    restart: unless-stopped
+
+# Bu kısım services'in içinde değil, root seviyede olmalı.
+# Burada yukarıda kullandığımız mssql_data volume'ünü tanımlıyoruz.
+# Docker bu volume'ü yönetir ve veritabanı dosyalarını burada saklar.
+volumes:
+  mssql_data:
+  mongodb_data:

@@ -57,35 +57,35 @@ function PieChart({ chartData, isLoading, error }) {
   }, [chartData, view, isLoading, error])
 
   return (
-    <div className="bg-white rounded-lg p-5 shadow mb-5">
-      <div className="flex justify-between items-center mb-5 border-b pb-3 border-gray-200">
-        <h2 className="text-2xl font-semibold text-gray-700">
+    <div className="bg-white rounded-lg p-3 sm:p-5 shadow mb-5">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5 border-b pb-3 border-gray-200">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-700">
           Ödeme Yöntemine Göre Dağılım
         </h2>
 
-        <div className="flex bg-gray-100 rounded-lg overflow-hidden">
+        <div className="flex bg-gray-100 rounded-lg overflow-hidden self-start sm:self-auto">
           <button
             onClick={() => setView('pie')}
-            className={`p-3 transition ${view === 'pie'
+            className={`p-2 sm:p-3 transition ${view === 'pie'
               ? 'bg-white shadow'
               : ''
               }`}
           >
             <HiOutlineChartPie
-              size={24}
+              size={22}
               className="text-blue-600"
             />
           </button>
 
           <button
             onClick={() => setView('table')}
-            className={`p-3 transition ${view === 'table'
+            className={`p-2 sm:p-3 transition ${view === 'table'
               ? 'bg-white shadow'
               : ''
               }`}
           >
             <HiOutlineTableCells
-              size={24}
+              size={22}
               className="text-gray-500"
             />
           </button>
@@ -93,11 +93,11 @@ function PieChart({ chartData, isLoading, error }) {
       </div>
 
       {isLoading ? (
-        <div className="h-[500px] flex justify-center items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+        <div className="h-[280px] sm:h-[380px] lg:h-[450px] flex justify-center items-center">
+          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-500" />
         </div>
       ) : error ? (
-        <div className="h-[500px] flex justify-center items-center text-red-500">
+        <div className="h-[280px] sm:h-[380px] lg:h-[450px] flex justify-center items-center text-red-500 text-center px-2">
           Hata: {error}
         </div>
       ) : (
@@ -105,97 +105,96 @@ function PieChart({ chartData, isLoading, error }) {
           {view === 'pie' && (
             <div
               ref={chartRef}
-              style={{
-                width: '100%',
-                height: '500px'
-              }}
+              className="w-full h-[280px] sm:h-[380px] lg:h-[450px]"
             />
           )}
 
           {view === 'table' && (
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b">
-                  <th className="p-3 text-left text-black">
-                    Ödeme Yöntemi
-                  </th>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[420px] border-collapse text-xs sm:text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="p-2 sm:p-3 text-left text-black">
+                      Ödeme Yöntemi
+                    </th>
 
-                  <th className="p-3 text-right text-black">
-                    Toplam Satış
-                  </th>
+                    <th className="p-2 sm:p-3 text-right text-black">
+                      Toplam Satış
+                    </th>
 
-                  <th className="p-3 text-right text-black">
-                    Sipariş Sayısı
-                  </th>
-                </tr>
-              </thead>
+                    <th className="p-2 sm:p-3 text-right text-black">
+                      Sipariş Sayısı
+                    </th>
+                  </tr>
+                </thead>
 
-              <tbody>
-                {chartData.map(item => {
-                  const total = chartData.reduce(
-                    (sum, x) => sum + x.value,
-                    0
-                  )
-
-                  const percentage = (
-                    (item.value / total) *
-                    100
-                  ).toFixed(2)
-
-                  return (
-                    <tr
-                      key={item.category}
-                      className="border-b"
-                    >
-                      <td className="p-3 text-gray-500">
-                        {item.category}
-                      </td>
-
-                      <td className="p-3 text-right text-gray-500">
-                        ₺
-                        {Number(item.value).toLocaleString(
-                          'tr-TR',
-                          {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                          }
-                        )}
-                      </td>
-
-                      <td className="p-3 text-right text-gray-500">
-                        {item.orderCount} (%{percentage})
-                      </td>
-                    </tr>
-                  )
-                })}
-
-                <tr className="font-bold bg-black/70">
-                  <td className="p-3 text-white">
-                    Toplam
-                  </td>
-
-                  <td className="p-3 text-right text-white">
-                    ₺
-                    {Number(
-                      chartData.reduce(
-                        (sum, x) => sum + x.value,
-                        0
-                      )
-                    ).toLocaleString('tr-TR', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    })}
-                  </td>
-
-                  <td className="p-3 text-right text-white">
-                    {chartData.reduce(
-                      (sum, x) => sum + x.orderCount,
+                <tbody>
+                  {chartData.map(item => {
+                    const total = chartData.reduce(
+                      (sum, x) => sum + x.value,
                       0
-                    )}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                    )
+
+                    const percentage = (
+                      (item.value / total) *
+                      100
+                    ).toFixed(2)
+
+                    return (
+                      <tr
+                        key={item.category}
+                        className="border-b"
+                      >
+                        <td className="p-2 sm:p-3 text-gray-500">
+                          {item.category}
+                        </td>
+
+                        <td className="p-2 sm:p-3 text-right text-gray-500 whitespace-nowrap">
+                          ₺
+                          {Number(item.value).toLocaleString(
+                            'tr-TR',
+                            {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            }
+                          )}
+                        </td>
+
+                        <td className="p-2 sm:p-3 text-right text-gray-500 whitespace-nowrap">
+                          {item.orderCount} (%{percentage})
+                        </td>
+                      </tr>
+                    )
+                  })}
+
+                  <tr className="font-bold bg-black/70">
+                    <td className="p-2 sm:p-3 text-white">
+                      Toplam
+                    </td>
+
+                    <td className="p-2 sm:p-3 text-right text-white whitespace-nowrap">
+                      ₺
+                      {Number(
+                        chartData.reduce(
+                          (sum, x) => sum + x.value,
+                          0
+                        )
+                      ).toLocaleString('tr-TR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })}
+                    </td>
+
+                    <td className="p-2 sm:p-3 text-right text-white whitespace-nowrap">
+                      {chartData.reduce(
+                        (sum, x) => sum + x.orderCount,
+                        0
+                      )}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           )}
         </>
       )}
