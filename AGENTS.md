@@ -75,16 +75,6 @@ Kullanıcı reddederse, kararsız kalırsa veya bilginin geçici olduğunu söyl
 
 Bir prompt geldiğinde cevap veya implementasyon bu standartlara göre şekillenmelidir.
 
-## Skill Perspektifi Seçimi
-
-- UI veya tasarım isteklerinde: `senior-frontend`, `frontend-design`, `ui-ux-pro-max`, `tailwind-patterns`, `react-best-practices`
-- Backend isteklerinde: `senior-backend`, `software-architecture`, `clean-code`, CQRS/MediatR, `security`
-- Docker isteklerinde: `docker-expert`, `senior-fullstack`, `security`
-- Test isteklerinde: `webapp-testing`, `clean-code`, `senior-fullstack`
-- Kod inceleme isteklerinde: `code-reviewer`, `clean-code`, `software-architecture`, `security`, `performance-review`
-
-Skill isimlerini cevapta her zaman tek tek saymak zorunlu değildir, fakat düşünme şekli bu perspektiflere uygun olmalıdır.
-
 ## Temel Çalışma Prensibi
 
 Direkt çözüm veya kod üretmeden önce şu sırayı izle:
@@ -96,3 +86,5 @@ Direkt çözüm veya kod üretmeden önce şu sırayı izle:
 5. Uygun çözümü uygula veya öner.
 
 Bu repository üzerinde amaç sadece çalışan kod üretmek değil; sürdürülebilir, okunabilir, test edilebilir ve mimariye uygun çözüm üretmektir.
+
+@RTK.md
