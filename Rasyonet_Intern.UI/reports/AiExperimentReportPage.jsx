@@ -1,202 +1,134 @@
-import { useEffect, useMemo, useState } from 'react'
+import NavigationButton from '../src/components/NavigationButton'
 
-const STORAGE_KEY = 'ai-experiment-report'
-
-const referencePages = [
+const experimentReports = [
   {
-    id: 'fonFon',
-    title: 'Fon Fon Sayfasi',
-    imageName: 'fon-fon.png',
-    imageSrc: '/images/fon-fon.png',
+    id: 'gpt_5_4_test',
+    title: 'gpt_5_4_test',
+    model: 'GPT 5.4',
+    pageCount: 2,
+    fileCount: 3,
+    codeLines: 654,
+    componentCount: 23,
+    cleanCodeScore: 88,
+    consistencyScore: 92,
+    responsiveScore: 90,
+    routes: {
+      fon: '/reports/gpt_5_4_test/fon',
+      yonetimUcreti: '/reports/gpt_5_4_test/yonetim-ucreti-degisiklikleri',
+    },
+    pages: [
+      {
+        name: 'FonPage',
+        lines: 238,
+        summary:
+          'Grafik, tab ve header davranisi ortak ReportChrome yapisina bagli. Chart datasi deterministik ve referans ekrana yakin.',
+      },
+      {
+        name: 'YonetimUcretiDegisiklikleriPage',
+        lines: 191,
+        summary:
+          'Tablo, filtre ve floating action parcali componentlere ayrilmis. Ayni header kontratini kullandigi icin iki sayfa arasi tutarlilik yuksek.',
+      },
+      {
+        name: 'ReportChrome',
+        lines: 225,
+        summary:
+          'Tekrar eden header, tab, ikon ve layout parcasi ortaklastirilmis. Clean code skorunu yukselten ana fark bu dosya.',
+      },
+    ],
+    verdict:
+      'En dengeli sonuc. Bir dosya fazla acilmis gibi gorunse de bu dosya tekrar eden UI iskeletini topladigi icin bakimi kolaylastiriyor.',
   },
   {
-    id: 'yonetimUcreti',
-    title: 'Yonetim Ucreti Degisiklikleri Sayfasi',
-    imageName: 'yonetim-ucreti-degisiklikleri.png',
-    imageSrc: '/images/yonetim-ucreti-degisiklikleri.png',
+    id: 'gpt_5_5_test',
+    title: 'gpt_5_5_test',
+    model: 'GPT 5.5',
+    pageCount: 2,
+    fileCount: 2,
+    codeLines: 503,
+    componentCount: 14,
+    cleanCodeScore: 74,
+    consistencyScore: 78,
+    responsiveScore: 82,
+    routes: {
+      fon: '/reports/gpt_5_5_test/fon',
+      yonetimUcreti: '/reports/gpt_5_5_test/yonetim-ucreti-degisiklikleri',
+    },
+    pages: [
+      {
+        name: 'FonPage',
+        lines: 259,
+        summary:
+          'Grafik sayfasi referansa yakin; ancak header, tab ve ikon gibi ortak alanlar bu dosyada yeniden yazilmis.',
+      },
+      {
+        name: 'YonetimUcretiDegisiklikleriPage',
+        lines: 244,
+        summary:
+          'Tablo parcalanmasi yeterli, fakat FonPage ile ortak layout sozlesmesi olmadigi icin tekrar ve stil sapmasi var.',
+      },
+    ],
+    verdict:
+      'Dosya sayisi az ama tekrar orani daha yuksek. Kisa vadede okunabilir, uzun vadede ortak ReportChrome benzeri bir katman ister.',
+  },
+  {
+    id: 'haiku_4_5_test',
+    title: 'haiku_4_5_test',
+    model: 'Haiku 4.5',
+    pageCount: 2,
+    fileCount: 2,
+    codeLines: 405,
+    componentCount: 3,
+    cleanCodeScore: 55,
+    consistencyScore: 48,
+    responsiveScore: 64,
+    routes: {
+      fon: '/reports/haiku_4_5_test/fon',
+      yonetimUcreti: '/reports/haiku_4_5_test/yonetim-ucreti-degisiklikleri',
+    },
+    pages: [
+      {
+        name: 'FonPage',
+        lines: 149,
+        summary:
+          'Daha az satir var ama Math.random ile uretilen grafik verisi deterministik degil. Referans ekran detaylari sade kalmis.',
+      },
+      {
+        name: 'YonetimUcretiDegisiklikleriPage',
+        lines: 256,
+        summary:
+          'Filtreleme davranisi eklenmis, fakat sayfa tek buyuk component halinde kaldigi icin test edilebilirlik ve tekrar kullanimi zayif.',
+      },
+    ],
+    verdict:
+      'En hizli ve kisa cikti, fakat profesyonel UI tutarliligi ve clean code acisindan diger iki denemenin gerisinde.',
   },
 ]
 
-const methods = [
-  {
-    id: 'claudeSkill',
-    label: 'Claude + Skill',
-    detail: 'Claude tarafinda hazir skill ile uretim',
-  },
-  {
-    id: 'claudeNoSkill',
-    label: "Claude + Skill'siz",
-    detail: 'Claude uzerinden skill kullanmadan uretim',
-  },
-  {
-    id: 'claudeCustomSkill',
-    label: 'Claude + Ozel Skill',
-    detail: 'Kendi olusturdugun skill ile Claude uretimi',
-  },
+const summaryItems = [
+  ['Toplam klasor', experimentReports.length],
+  ['Toplam referans sayfa', experimentReports.reduce((sum, report) => sum + report.pageCount, 0)],
+  ['Toplam JSX dosya', experimentReports.reduce((sum, report) => sum + report.fileCount, 0)],
+  ['Toplam kod satiri', experimentReports.reduce((sum, report) => sum + report.codeLines, 0)],
 ]
 
-const emptyMetric = {
-  tokens: 0,
-  iterations: 1,
-  fileCount: 0,
-  componentCount: 0,
-  duplicateRate: 0,
-  responsiveScore: 0,
-  accessibilityScore: 0,
-  promptCount: 1,
-}
+function ScoreBadge({ label, value }) {
+  const tone =
+    value >= 85
+      ? 'bg-emerald-50 text-emerald-700'
+      : value >= 70
+        ? 'bg-amber-50 text-amber-700'
+        : 'bg-rose-50 text-rose-700'
 
-const initialMetrics = referencePages.reduce((pageAcc, page) => {
-  pageAcc[page.id] = methods.reduce((methodAcc, method) => {
-    methodAcc[method.id] = { ...emptyMetric }
-    return methodAcc
-  }, {})
-
-  return pageAcc
-}, {})
-
-const initialNotes = referencePages.reduce((acc, page) => {
-  acc[page.id] = ''
-  return acc
-}, {})
-
-const metricGuide = [
-  ['Harcanan token', 'Uretim icin harcanan toplam token sayisi'],
-  ['Iterasyon sayisi', 'Kac kere duzeltme istendigini gosterir'],
-  ['Olusan dosya sayisi', 'Kodun parcalanma seviyesini gosterir'],
-  ['Component sayisi', 'Frontend mimarisi icin onemli'],
-  ['Kod tekrar orani', 'Clean Code kalitesi'],
-  ['Responsive uyum', 'UI kalitesi'],
-  ['Accessibility', 'Profesyonel frontend kalitesi'],
-  ['Prompt sayisi', 'Yapay zekayi ne kadar yonlendirdigini gosterir'],
-]
-
-function toNumber(value) {
-  return Number.isFinite(Number(value)) ? Number(value) : 0
-}
-
-function getTotalTokens(metric) {
-  return toNumber(metric.tokens)
-}
-
-function getStoredReport() {
-  if (typeof window === 'undefined') {
-    return {}
-  }
-
-  try {
-    return JSON.parse(window.localStorage.getItem(STORAGE_KEY)) || {}
-  } catch {
-    return {}
-  }
-}
-
-function normalizeMetrics(storedMetrics = {}) {
-  return referencePages.reduce((pageAcc, page) => {
-    pageAcc[page.id] = methods.reduce((methodAcc, method) => {
-      const storedMetric = storedMetrics?.[page.id]?.[method.id] || {}
-
-      methodAcc[method.id] = Object.keys(emptyMetric).reduce((metricAcc, field) => {
-        metricAcc[field] =
-          field === 'tokens'
-            ? storedMetric.tokens ??
-              toNumber(storedMetric.inputTokens) + toNumber(storedMetric.outputTokens)
-            : storedMetric[field] ?? emptyMetric[field]
-        return metricAcc
-      }, {})
-
-      return methodAcc
-    }, {})
-
-    return pageAcc
-  }, {})
-}
-
-function normalizeNotes(storedNotes = {}) {
-  return referencePages.reduce((acc, page) => {
-    acc[page.id] = storedNotes?.[page.id] ?? initialNotes[page.id]
-    return acc
-  }, {})
-}
-
-function getInitialReport() {
-  const storedReport = getStoredReport()
-
-  return {
-    metrics: normalizeMetrics(storedReport.metrics),
-    notes: normalizeNotes(storedReport.notes),
-    reportDate: storedReport.reportDate || new Date().toISOString().slice(0, 10),
-    sharedPrompt: storedReport.sharedPrompt || '',
-  }
-}
-
-function getQualityScore(metric) {
-  const responsive = Math.min(toNumber(metric.responsiveScore), 100)
-  const accessibility = Math.min(toNumber(metric.accessibilityScore), 100)
-  const cleanCode = Math.max(0, 100 - Math.min(toNumber(metric.duplicateRate), 100))
-  const structure = Math.min(
-    100,
-    toNumber(metric.fileCount) * 8 + toNumber(metric.componentCount) * 10,
-  )
-
-  return Math.round(
-    responsive * 0.28 + accessibility * 0.28 + cleanCode * 0.24 + structure * 0.2,
-  )
-}
-
-function formatNumber(value) {
-  return new Intl.NumberFormat('tr-TR').format(Math.round(toNumber(value)))
-}
-
-function getPageRows(pageId, metrics) {
-  return methods.map((method, index) => {
-    const metric = metrics[pageId][method.id]
-
-    return {
-      ...method,
-      testNo: index + 1,
-      ...metric,
-      totalTokens: getTotalTokens(metric),
-      qualityScore: getQualityScore(metric),
-    }
-  })
-}
-
-function getSummary(rows) {
-  const filledRows = rows.filter((row) => row.totalTokens > 0)
-  const totalTokens = rows.reduce((sum, row) => sum + row.totalTokens, 0)
-  const lowestToken = [...filledRows].sort((a, b) => a.totalTokens - b.totalTokens)[0]
-  const highestQuality = [...rows].sort((a, b) => b.qualityScore - a.qualityScore)[0]
-  const lowestIteration = [...rows]
-    .filter((row) => toNumber(row.iterations) > 0)
-    .sort((a, b) => toNumber(a.iterations) - toNumber(b.iterations))[0]
-  const highestPromptCount = [...rows].sort(
-    (a, b) => toNumber(b.promptCount) - toNumber(a.promptCount),
-  )[0]
-
-  return {
-    totalTokens,
-    lowestToken: lowestToken?.label || '-',
-    highestQuality: highestQuality?.qualityScore > 0 ? highestQuality.label : '-',
-    lowestIteration: lowestIteration?.label || '-',
-    highestPromptCount:
-      toNumber(highestPromptCount?.promptCount) > 0 ? highestPromptCount.label : '-',
-  }
-}
-
-function NumberInput({ label, max, min = 0, onChange, value }) {
   return (
-    <label className="grid gap-1">
-      <span className="text-xs font-bold text-slate-500">{label}</span>
-      <input
-        className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-        max={max}
-        min={min}
-        onChange={(event) => onChange(event.target.value)}
-        type="number"
-        value={value}
-      />
-    </label>
+    <div className="rounded-lg border border-slate-200 bg-white p-4">
+      <p className="text-xs font-black uppercase tracking-normal text-slate-500">
+        {label}
+      </p>
+      <strong className={`mt-2 inline-flex rounded-lg px-3 py-2 text-xl font-black ${tone}`}>
+        %{value}
+      </strong>
+    </div>
   )
 }
 
@@ -206,406 +138,120 @@ function SummaryCard({ label, value }) {
       <p className="text-xs font-black uppercase tracking-normal text-slate-500">
         {label}
       </p>
-      <strong className="mt-2 block text-xl font-black tracking-normal text-slate-950">
+      <strong className="mt-2 block text-2xl font-black tracking-normal text-slate-950">
         {value}
       </strong>
     </article>
   )
 }
 
-function PageReportSection({ note, onMetricChange, onNoteChange, page, rows }) {
-  const summary = useMemo(() => getSummary(rows), [rows])
-  const tokenRanking = useMemo(() => {
-    return [...rows]
-      .filter((row) => row.totalTokens > 0)
-      .sort((a, b) => a.totalTokens - b.totalTokens)
-  }, [rows])
-
+function ReportCard({ report }) {
   return (
-    <section className="grid gap-5 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div>
           <p className="text-sm font-black uppercase tracking-normal text-blue-700">
-            3 test
+            {report.id}
           </p>
           <h2 className="mt-1 text-2xl font-black tracking-normal text-slate-950">
-            {page.title}
+            {report.model} test raporu
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            Bu bolumde ayni referans gorsel icin 3 farkli Claude uretim
-            yontemi karsilastirilir.
-          </p>
+          <p className="mt-3 text-sm leading-6 text-slate-600">{report.verdict}</p>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <SummaryCard label="Toplam token" value={formatNumber(summary.totalTokens)} />
-            <SummaryCard label="En az token" value={summary.lowestToken} />
-            <SummaryCard label="En yuksek kalite" value={summary.highestQuality} />
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <SummaryCard label="Sayfa" value={report.pageCount} />
+            <SummaryCard label="Dosya" value={report.fileCount} />
+            <SummaryCard label="Kod satiri" value={report.codeLines} />
+            <SummaryCard label="Component" value={report.componentCount} />
           </div>
         </div>
 
-        <aside className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-          <div className="grid aspect-video place-items-center overflow-hidden rounded-lg bg-white">
-            <img
-              alt={page.title}
-              className="h-full w-full object-contain"
-              src={page.imageSrc}
-            />
-          </div>
-          <p className="mt-3 text-xs font-bold text-slate-500">{page.imageName}</p>
-        </aside>
+        <div className="grid gap-3">
+          <ScoreBadge label="Clean code" value={report.cleanCodeScore} />
+          <ScoreBadge label="Tutarlilik" value={report.consistencyScore} />
+          <ScoreBadge label="Responsive" value={report.responsiveScore} />
+        </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-slate-200">
-        <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
-          <h3 className="text-lg font-black tracking-normal text-slate-950">
-            Metrik Tablosu
-          </h3>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1040px] text-left text-sm">
-            <thead className="bg-slate-50 text-xs font-black uppercase tracking-normal text-slate-500">
-              <tr>
-                <th className="px-4 py-3">Test</th>
-                <th className="px-4 py-3">Yontem</th>
-                <th className="px-4 py-3">Harcanan token</th>
-                <th className="px-4 py-3">Iterasyon</th>
-                <th className="px-4 py-3">Dosya</th>
-                <th className="px-4 py-3">Component</th>
-                <th className="px-4 py-3">Tekrar %</th>
-                <th className="px-4 py-3">Responsive</th>
-                <th className="px-4 py-3">A11y</th>
-                <th className="px-4 py-3">Prompt</th>
-                <th className="px-4 py-3">Kalite</th>
+      <div className="mt-5 overflow-hidden rounded-lg border border-slate-200">
+        <table className="w-full min-w-[760px] text-left text-sm">
+          <thead className="bg-slate-50 text-xs font-black uppercase tracking-normal text-slate-500">
+            <tr>
+              <th className="px-4 py-3">Icerik</th>
+              <th className="px-4 py-3">Satir</th>
+              <th className="px-4 py-3">Yorum</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200 bg-white">
+            {report.pages.map((page) => (
+              <tr key={page.name}>
+                <td className="px-4 py-4 font-black text-slate-950">{page.name}</td>
+                <td className="px-4 py-4 font-bold text-slate-800">{page.lines}</td>
+                <td className="px-4 py-4 leading-6 text-slate-600">{page.summary}</td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 bg-white">
-              {rows.map((row) => (
-                <tr className="align-top" key={row.id}>
-                  <td className="px-4 py-4">
-                    <strong className="block font-black text-slate-950">
-                      Test {row.testNo}
-                    </strong>
-                    <span className="text-xs font-semibold text-slate-500">
-                      {row.detail}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 font-bold text-slate-800">{row.label}</td>
-                  <td className="px-2 py-3">
-                    <NumberInput
-                      label="Token"
-                      onChange={(value) => onMetricChange(row.id, 'tokens', value)}
-                      value={row.tokens}
-                    />
-                  </td>
-                  <td className="px-2 py-3">
-                    <NumberInput
-                      label="Adet"
-                      onChange={(value) => onMetricChange(row.id, 'iterations', value)}
-                      value={row.iterations}
-                    />
-                  </td>
-                  <td className="px-2 py-3">
-                    <NumberInput
-                      label="Adet"
-                      onChange={(value) => onMetricChange(row.id, 'fileCount', value)}
-                      value={row.fileCount}
-                    />
-                  </td>
-                  <td className="px-2 py-3">
-                    <NumberInput
-                      label="Adet"
-                      onChange={(value) => onMetricChange(row.id, 'componentCount', value)}
-                      value={row.componentCount}
-                    />
-                  </td>
-                  <td className="px-2 py-3">
-                    <NumberInput
-                      label="0-100"
-                      max="100"
-                      onChange={(value) => onMetricChange(row.id, 'duplicateRate', value)}
-                      value={row.duplicateRate}
-                    />
-                  </td>
-                  <td className="px-2 py-3">
-                    <NumberInput
-                      label="0-100"
-                      max="100"
-                      onChange={(value) => onMetricChange(row.id, 'responsiveScore', value)}
-                      value={row.responsiveScore}
-                    />
-                  </td>
-                  <td className="px-2 py-3">
-                    <NumberInput
-                      label="0-100"
-                      max="100"
-                      onChange={(value) =>
-                        onMetricChange(row.id, 'accessibilityScore', value)
-                      }
-                      value={row.accessibilityScore}
-                    />
-                  </td>
-                  <td className="px-2 py-3">
-                    <NumberInput
-                      label="Adet"
-                      onChange={(value) => onMetricChange(row.id, 'promptCount', value)}
-                      value={row.promptCount}
-                    />
-                  </td>
-                  <td className="px-4 py-4">
-                    <span className="inline-flex min-w-14 justify-center rounded-lg bg-emerald-50 px-3 py-2 text-base font-black text-emerald-700">
-                      {row.qualityScore}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
-        <article className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <h3 className="text-lg font-black tracking-normal text-slate-950">
-            Token Siralamasi
-          </h3>
-          <ol className="mt-4 grid gap-3">
-            {tokenRanking.length ? (
-              tokenRanking.map((row, index) => (
-                <li
-                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3"
-                  key={row.id}
-                >
-                  <span>
-                    <strong className="block text-sm font-black text-slate-950">
-                      {index + 1}. {row.label}
-                    </strong>
-                    <span className="text-xs font-semibold text-slate-500">
-                      {row.iterations} iterasyon, {row.promptCount} prompt
-                    </span>
-                  </span>
-                  <span className="text-lg font-black text-blue-700">
-                    {formatNumber(row.totalTokens)}
-                  </span>
-                </li>
-              ))
-            ) : (
-              <li className="rounded-lg border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm font-medium text-slate-500">
-                Token degeri girilmedi.
-              </li>
-            )}
-          </ol>
-        </article>
-
-        <article className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <h3 className="text-lg font-black tracking-normal text-slate-950">
-            Sayfa Sonucu
-          </h3>
-          <div className="mt-4 grid gap-2 text-sm text-slate-600">
-            <p>
-              En az iterasyon:{' '}
-              <strong className="text-slate-950">{summary.lowestIteration}</strong>
-            </p>
-            <p>
-              En cok prompt:{' '}
-              <strong className="text-slate-950">{summary.highestPromptCount}</strong>
-            </p>
-          </div>
-          <label className="mt-4 grid gap-2">
-            <span className="text-sm font-bold text-slate-600">
-              Degerlendirme notu
-            </span>
-            <textarea
-              className="min-h-32 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm leading-6 text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-              onChange={(event) => onNoteChange(event.target.value)}
-              placeholder="Bu referans sayfa icin token maliyeti, kod detayi ve skill etkisini kisa yorumla."
-              value={note}
-            />
-          </label>
-        </article>
+      <div className="mt-5 flex flex-wrap gap-3">
+        <NavigationButton to={report.routes.fon} text="FonPage'e Git" />
+        <NavigationButton
+          to={report.routes.yonetimUcreti}
+          text="Yonetim Ucreti Sayfasina Git"
+        />
       </div>
     </section>
   )
 }
 
 function AiExperimentReportPage() {
-  const initialReport = useMemo(() => getInitialReport(), [])
-  const [metrics, setMetrics] = useState(initialReport.metrics)
-  const [reportDate, setReportDate] = useState(initialReport.reportDate)
-  const [sharedPrompt, setSharedPrompt] = useState(initialReport.sharedPrompt)
-  const [notes, setNotes] = useState(initialReport.notes)
-
-  useEffect(() => {
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        metrics,
-        notes,
-        reportDate,
-        sharedPrompt,
-      }),
-    )
-  }, [metrics, notes, reportDate, sharedPrompt])
-
-  const pageRows = useMemo(() => {
-    return referencePages.reduce((acc, page) => {
-      acc[page.id] = getPageRows(page.id, metrics)
-      return acc
-    }, {})
-  }, [metrics])
-
-  const allRows = useMemo(() => {
-    return referencePages.flatMap((page) =>
-      pageRows[page.id].map((row) => ({
-        ...row,
-        pageId: page.id,
-        pageTitle: page.title,
-      })),
-    )
-  }, [pageRows])
-
-  const overallSummary = useMemo(() => {
-    const summary = getSummary(allRows)
-
-    return {
-      ...summary,
-      totalTests: allRows.length,
-    }
-  }, [allRows])
-
-  function updateMetric(pageId, methodId, field, value) {
-    setMetrics((current) => ({
-      ...current,
-      [pageId]: {
-        ...current[pageId],
-        [methodId]: {
-          ...current[pageId][methodId],
-          [field]: value,
-        },
-      },
-    }))
-  }
-
-  function updateNote(pageId, value) {
-    setNotes((current) => ({
-      ...current,
-      [pageId]: value,
-    }))
-  }
-
-  function resetReport() {
-    setMetrics(initialMetrics)
-    setReportDate(new Date().toISOString().slice(0, 10))
-    setSharedPrompt('')
-    setNotes(initialNotes)
-  }
-
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto grid w-full max-w-7xl gap-5">
-        <header className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-4xl">
+        <header className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:flex-row lg:items-start lg:justify-between">
+          <div>
             <p className="text-sm font-black uppercase tracking-normal text-blue-700">
               AI deney raporu
             </p>
             <h1 className="mt-2 text-3xl font-black leading-tight tracking-normal text-slate-950 sm:text-4xl">
-              Claude Site Uretim Karsilastirmasi
+              Klasor Bazli Site Uretim Karsilastirmasi
             </h1>
-            <p className="mt-3 text-base leading-7 text-slate-600">
-              Iki referans gorsel icin uc farkli Claude uretim yontemini ayri
-              ayri karsilastir. Toplam 6 test satiri token ve frontend
-              kalite metrikleriyle takip edilir.
+            <p className="mt-3 max-w-4xl text-base leading-7 text-slate-600">
+              gpt_5_4_test, gpt_5_5_test ve haiku_4_5_test klasorleri; acilan
+              sayfa sayisi, yazilan kod satiri, component parcalanmasi, clean
+              code yuzdesi ve sayfalar arasi tutarlilik acisindan raporlandi.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <button
-              className="h-10 rounded-lg border border-slate-300 bg-white px-4 text-sm font-bold text-slate-950 shadow-sm transition hover:border-blue-500"
-              onClick={resetReport}
-              type="button"
-            >
-              Temizle
-            </button>
-            <button
-              className="h-10 rounded-lg bg-blue-600 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700"
-              onClick={() => window.print()}
-              type="button"
-            >
-              PDF / Yazdir
-            </button>
+          <div className="flex shrink-0">
+            <NavigationButton to="/charts" text="Grafikler Sayfasına Dön" />
           </div>
         </header>
 
-        <section className="grid gap-5 lg:grid-cols-[240px_minmax(0,1fr)]">
-          <label className="grid gap-2 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <span className="text-sm font-bold text-slate-600">Rapor tarihi</span>
-            <input
-              className="h-10 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-              onChange={(event) => setReportDate(event.target.value)}
-              type="date"
-              value={reportDate}
-            />
-          </label>
-          <label className="grid gap-2 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <span className="text-sm font-bold text-slate-600">Ortak prompt</span>
-            <textarea
-              className="min-h-24 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm leading-6 text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-              onChange={(event) => setSharedPrompt(event.target.value)}
-              placeholder="Iki sayfa icin ortak kalan ana prompt veya kisa deney ozeti"
-              value={sharedPrompt}
-            />
-          </label>
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {summaryItems.map(([label, value]) => (
+            <SummaryCard key={label} label={label} value={value} />
+          ))}
         </section>
-
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          <SummaryCard label="Toplam test" value={overallSummary.totalTests} />
-          <SummaryCard
-            label="Toplam token"
-            value={formatNumber(overallSummary.totalTokens)}
-          />
-          <SummaryCard label="Genel en az token" value={overallSummary.lowestToken} />
-          <SummaryCard
-            label="Genel en yuksek kalite"
-            value={overallSummary.highestQuality}
-          />
-        </section>
-
-        {referencePages.map((page) => (
-          <PageReportSection
-            key={page.id}
-            note={notes[page.id]}
-            onMetricChange={(methodId, field, value) =>
-              updateMetric(page.id, methodId, field, value)
-            }
-            onNoteChange={(value) => updateNote(page.id, value)}
-            page={page}
-            rows={pageRows[page.id]}
-          />
-        ))}
 
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-xl font-black tracking-normal text-slate-950">
-            Metrik Anlamlari
+            Genel Sonuc
           </h2>
-          <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs font-black uppercase tracking-normal text-slate-500">
-                <tr>
-                  <th className="px-4 py-3">Metrik</th>
-                  <th className="px-4 py-3">Neden onemli?</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {metricGuide.map(([metric, reason]) => (
-                  <tr key={metric}>
-                    <td className="px-4 py-3 font-bold text-slate-900">{metric}</td>
-                    <td className="px-4 py-3 text-slate-600">{reason}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            gpt_5_4_test en temiz mimariyi verdi; cunku ortak ReportChrome
+            dosyasi ile iki sayfa arasindaki header, tab ve ikon tekrarlarini
+            azaltti. gpt_5_5_test gorsel olarak yakin ama ortaklasma zayif.
+            haiku_4_5_test daha az satir uretti fakat tek buyuk component,
+            rastgele chart verisi ve daha dusuk referans benzerligi nedeniyle
+            bakim kalitesi dusuk.
+          </p>
         </section>
+
+        {experimentReports.map((report) => (
+          <ReportCard key={report.id} report={report} />
+        ))}
       </div>
     </main>
   )

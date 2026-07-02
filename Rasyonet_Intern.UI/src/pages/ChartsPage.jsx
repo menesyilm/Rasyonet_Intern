@@ -254,6 +254,11 @@ function ChartsPage() {
             to="/"
             text="Performans Sayfası"
           />
+
+          <NavigationButton
+            to="/report"
+            text="AI Deney Raporu"
+          />
         </div>
       </div>
 

@@ -11,6 +11,19 @@ jest.mock('../services/api', () => ({
     getStoreLocationData: jest.fn().mockResolvedValue([]),
     getMonthlyTrendData: jest.fn().mockResolvedValue([])
 }))
+
+jest.mock('../services/signalr', () => ({
+    createDashboardConnection: jest.fn(() => ({
+        start: jest.fn().mockResolvedValue(),
+        on: jest.fn(),
+        onreconnecting: jest.fn(),
+        onreconnected: jest.fn(),
+        onclose: jest.fn(),
+        off: jest.fn(),
+        stop: jest.fn().mockResolvedValue()
+    }))
+}))
+
 jest.mock('../components/PieChart', () => () => <div>PieChart</div>)
 
 jest.mock('../components/BarChart', () => () => <div>BarChart</div>)
