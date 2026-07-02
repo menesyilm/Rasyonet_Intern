@@ -38,7 +38,7 @@ Rasyonet_Intern, satış ve kategori verilerini yöneten bir dashboard uygulamas
 - `Rasyonet_Intern.UI/`: React + Vite frontend.
 - `Rasyonet_Intern.UI/public/images/`: UI tarafinda kullanilan statik gorsel dosyalari.
 - `Rasyonet_Intern.UI/reports/`: UI icinde route edilen deney ve rapor sayfalari.
-- `Rasyonet_Intern.UI/reports/skill_test/`, `plain_test/`, `custom_skill_test/`: AI deney sayfalari yontem bazli ayrilir; her klasorde referans gorsel basina ayri React page tutulur.
+- `Rasyonet_Intern.UI/reports/gpt_5.4_test/`, `gpt_5.5_test/`, `claude_test/`: AI deney sayfalari yontem bazli ayrilir; her klasorde referans gorsel basina ayri React page tutulur.
 - `Rasyonet_Intern.UI/src/pages/`: performans ve chart sayfaları.
 - `Rasyonet_Intern.UI/src/components/`: chart, navigation, status ve UI componentleri.
 - `Rasyonet_Intern.UI/src/services/`: API ve SignalR client kodu.
