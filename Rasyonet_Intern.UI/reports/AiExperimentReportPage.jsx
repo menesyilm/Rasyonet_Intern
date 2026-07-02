@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+
+const STORAGE_KEY = 'ai-experiment-report'
 
 const referencePages = [
   {
@@ -34,9 +36,7 @@ const methods = [
 ]
 
 const emptyMetric = {
-  inputTokens: 0,
-  outputTokens: 0,
-  credits: 0,
+  tokens: 0,
   iterations: 1,
   fileCount: 0,
   componentCount: 0,
@@ -61,7 +61,7 @@ const initialNotes = referencePages.reduce((acc, page) => {
 }, {})
 
 const metricGuide = [
-  ['Toplam token / credit', 'Maliyet'],
+  ['Harcanan token', 'Uretim icin harcanan toplam token sayisi'],
   ['Iterasyon sayisi', 'Kac kere duzeltme istendigini gosterir'],
   ['Olusan dosya sayisi', 'Kodun parcalanma seviyesini gosterir'],
   ['Component sayisi', 'Frontend mimarisi icin onemli'],
@@ -76,7 +76,58 @@ function toNumber(value) {
 }
 
 function getTotalTokens(metric) {
-  return toNumber(metric.inputTokens) + toNumber(metric.outputTokens)
+  return toNumber(metric.tokens)
+}
+
+function getStoredReport() {
+  if (typeof window === 'undefined') {
+    return {}
+  }
+
+  try {
+    return JSON.parse(window.localStorage.getItem(STORAGE_KEY)) || {}
+  } catch {
+    return {}
+  }
+}
+
+function normalizeMetrics(storedMetrics = {}) {
+  return referencePages.reduce((pageAcc, page) => {
+    pageAcc[page.id] = methods.reduce((methodAcc, method) => {
+      const storedMetric = storedMetrics?.[page.id]?.[method.id] || {}
+
+      methodAcc[method.id] = Object.keys(emptyMetric).reduce((metricAcc, field) => {
+        metricAcc[field] =
+          field === 'tokens'
+            ? storedMetric.tokens ??
+              toNumber(storedMetric.inputTokens) + toNumber(storedMetric.outputTokens)
+            : storedMetric[field] ?? emptyMetric[field]
+        return metricAcc
+      }, {})
+
+      return methodAcc
+    }, {})
+
+    return pageAcc
+  }, {})
+}
+
+function normalizeNotes(storedNotes = {}) {
+  return referencePages.reduce((acc, page) => {
+    acc[page.id] = storedNotes?.[page.id] ?? initialNotes[page.id]
+    return acc
+  }, {})
+}
+
+function getInitialReport() {
+  const storedReport = getStoredReport()
+
+  return {
+    metrics: normalizeMetrics(storedReport.metrics),
+    notes: normalizeNotes(storedReport.notes),
+    reportDate: storedReport.reportDate || new Date().toISOString().slice(0, 10),
+    sharedPrompt: storedReport.sharedPrompt || '',
+  }
 }
 
 function getQualityScore(metric) {
@@ -112,9 +163,8 @@ function getPageRows(pageId, metrics) {
 }
 
 function getSummary(rows) {
-  const filledRows = rows.filter((row) => row.totalTokens > 0 || toNumber(row.credits) > 0)
+  const filledRows = rows.filter((row) => row.totalTokens > 0)
   const totalTokens = rows.reduce((sum, row) => sum + row.totalTokens, 0)
-  const totalCredits = rows.reduce((sum, row) => sum + toNumber(row.credits), 0)
   const lowestToken = [...filledRows].sort((a, b) => a.totalTokens - b.totalTokens)[0]
   const highestQuality = [...rows].sort((a, b) => b.qualityScore - a.qualityScore)[0]
   const lowestIteration = [...rows]
@@ -126,7 +176,6 @@ function getSummary(rows) {
 
   return {
     totalTokens,
-    totalCredits,
     lowestToken: lowestToken?.label || '-',
     highestQuality: highestQuality?.qualityScore > 0 ? highestQuality.label : '-',
     lowestIteration: lowestIteration?.label || '-',
@@ -189,7 +238,6 @@ function PageReportSection({ note, onMetricChange, onNoteChange, page, rows }) {
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <SummaryCard label="Toplam token" value={formatNumber(summary.totalTokens)} />
-            <SummaryCard label="Toplam credit" value={formatNumber(summary.totalCredits)} />
             <SummaryCard label="En az token" value={summary.lowestToken} />
             <SummaryCard label="En yuksek kalite" value={summary.highestQuality} />
           </div>
@@ -215,14 +263,12 @@ function PageReportSection({ note, onMetricChange, onNoteChange, page, rows }) {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1120px] text-left text-sm">
+          <table className="w-full min-w-[1040px] text-left text-sm">
             <thead className="bg-slate-50 text-xs font-black uppercase tracking-normal text-slate-500">
               <tr>
                 <th className="px-4 py-3">Test</th>
                 <th className="px-4 py-3">Yontem</th>
-                <th className="px-4 py-3">Input</th>
-                <th className="px-4 py-3">Output</th>
-                <th className="px-4 py-3">Credit</th>
+                <th className="px-4 py-3">Harcanan token</th>
                 <th className="px-4 py-3">Iterasyon</th>
                 <th className="px-4 py-3">Dosya</th>
                 <th className="px-4 py-3">Component</th>
@@ -230,7 +276,6 @@ function PageReportSection({ note, onMetricChange, onNoteChange, page, rows }) {
                 <th className="px-4 py-3">Responsive</th>
                 <th className="px-4 py-3">A11y</th>
                 <th className="px-4 py-3">Prompt</th>
-                <th className="px-4 py-3">Toplam</th>
                 <th className="px-4 py-3">Kalite</th>
               </tr>
             </thead>
@@ -249,22 +294,8 @@ function PageReportSection({ note, onMetricChange, onNoteChange, page, rows }) {
                   <td className="px-2 py-3">
                     <NumberInput
                       label="Token"
-                      onChange={(value) => onMetricChange(row.id, 'inputTokens', value)}
-                      value={row.inputTokens}
-                    />
-                  </td>
-                  <td className="px-2 py-3">
-                    <NumberInput
-                      label="Token"
-                      onChange={(value) => onMetricChange(row.id, 'outputTokens', value)}
-                      value={row.outputTokens}
-                    />
-                  </td>
-                  <td className="px-2 py-3">
-                    <NumberInput
-                      label="Credit"
-                      onChange={(value) => onMetricChange(row.id, 'credits', value)}
-                      value={row.credits}
+                      onChange={(value) => onMetricChange(row.id, 'tokens', value)}
+                      value={row.tokens}
                     />
                   </td>
                   <td className="px-2 py-3">
@@ -320,9 +351,6 @@ function PageReportSection({ note, onMetricChange, onNoteChange, page, rows }) {
                       onChange={(value) => onMetricChange(row.id, 'promptCount', value)}
                       value={row.promptCount}
                     />
-                  </td>
-                  <td className="px-4 py-4 text-lg font-black text-blue-700">
-                    {formatNumber(row.totalTokens)}
                   </td>
                   <td className="px-4 py-4">
                     <span className="inline-flex min-w-14 justify-center rounded-lg bg-emerald-50 px-3 py-2 text-base font-black text-emerald-700">
@@ -401,12 +429,23 @@ function PageReportSection({ note, onMetricChange, onNoteChange, page, rows }) {
 }
 
 function AiExperimentReportPage() {
-  const [metrics, setMetrics] = useState(initialMetrics)
-  const [reportDate, setReportDate] = useState(() => {
-    return new Date().toISOString().slice(0, 10)
-  })
-  const [sharedPrompt, setSharedPrompt] = useState('')
-  const [notes, setNotes] = useState(initialNotes)
+  const initialReport = useMemo(() => getInitialReport(), [])
+  const [metrics, setMetrics] = useState(initialReport.metrics)
+  const [reportDate, setReportDate] = useState(initialReport.reportDate)
+  const [sharedPrompt, setSharedPrompt] = useState(initialReport.sharedPrompt)
+  const [notes, setNotes] = useState(initialReport.notes)
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        metrics,
+        notes,
+        reportDate,
+        sharedPrompt,
+      }),
+    )
+  }, [metrics, notes, reportDate, sharedPrompt])
 
   const pageRows = useMemo(() => {
     return referencePages.reduce((acc, page) => {
@@ -456,6 +495,7 @@ function AiExperimentReportPage() {
 
   function resetReport() {
     setMetrics(initialMetrics)
+    setReportDate(new Date().toISOString().slice(0, 10))
     setSharedPrompt('')
     setNotes(initialNotes)
   }
@@ -473,7 +513,7 @@ function AiExperimentReportPage() {
             </h1>
             <p className="mt-3 text-base leading-7 text-slate-600">
               Iki referans gorsel icin uc farkli Claude uretim yontemini ayri
-              ayri karsilastir. Toplam 6 test satiri token, credit ve frontend
+              ayri karsilastir. Toplam 6 test satiri token ve frontend
               kalite metrikleriyle takip edilir.
             </p>
           </div>
@@ -498,6 +538,15 @@ function AiExperimentReportPage() {
 
         <section className="grid gap-5 lg:grid-cols-[240px_minmax(0,1fr)]">
           <label className="grid gap-2 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <span className="text-sm font-bold text-slate-600">Rapor tarihi</span>
+            <input
+              className="h-10 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              onChange={(event) => setReportDate(event.target.value)}
+              type="date"
+              value={reportDate}
+            />
+          </label>
+          <label className="grid gap-2 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <span className="text-sm font-bold text-slate-600">Ortak prompt</span>
             <textarea
               className="min-h-24 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm leading-6 text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
@@ -513,10 +562,6 @@ function AiExperimentReportPage() {
           <SummaryCard
             label="Toplam token"
             value={formatNumber(overallSummary.totalTokens)}
-          />
-          <SummaryCard
-            label="Toplam credit"
-            value={formatNumber(overallSummary.totalCredits)}
           />
           <SummaryCard label="Genel en az token" value={overallSummary.lowestToken} />
           <SummaryCard
