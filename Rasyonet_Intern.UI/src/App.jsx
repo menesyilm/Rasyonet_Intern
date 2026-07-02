@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import PerformancePage from './pages/PerformancePage'
 import ChartsPage from './pages/ChartsPage'
+import AiExperimentReportPage from '../reports/AiExperimentReportPage'
 
 function App() {
   return (
@@ -12,9 +13,15 @@ function App() {
 
       <Route
         path="/charts"
-        element={<ChartsPage/>}
+        element={<ChartsPage />}
+      />
+
+      <Route
+        path="/report"
+        element={<AiExperimentReportPage />}
       />
     </Routes>
+
   )
 }
 

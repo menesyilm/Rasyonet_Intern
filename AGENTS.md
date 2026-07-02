@@ -36,6 +36,22 @@ Kullanıcı reddederse, kararsız kalırsa veya bilginin geçici olduğunu söyl
 - Test stratejisi
 - Docker çalışma kuralı
 
+## Proje Dokümantasyon Senkronizasyon Kuralı
+
+Yeni bir klasör oluşturulduğunda, klasör adı değiştirildiğinde, klasör taşındığında veya önemli bir dosya eklendiğinde bunun proje klasör yapısını etkileyip etkilemediğini kontrol et.
+
+Eğer değişiklik klasör yapısını etkiliyorsa kullanıcıya şu soruyu sor:
+
+"Bu değişiklik proje klasör yapısını etkiliyor. memory.md içindeki Katmanlar ve Klasör Yapısına eklememi ister misin?"
+
+Kullanıcı onay vermeden memory.md dosyasını güncelleme.
+
+memory.md güncellenirken:
+- Sadece anlamlı mimari klasörleri ekle.
+- node_modules, dist, build, coverage, .vite gibi geçici/üretilmiş klasörleri ekleme.
+- Mevcut formatı bozma.
+- Klasör yapısını kısa ve okunabilir tut.
+
 ## memory.md Ne İçin Kullanılır?
 
 `memory.md`, sabit proje hafızasıdır.
