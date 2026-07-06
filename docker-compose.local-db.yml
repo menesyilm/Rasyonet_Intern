@@ -1,0 +1,59 @@
+# Runs only API and UI containers while the API connects to databases on the host machine.
+services:
+  backend:
+    build:
+      context: ./Rasyonet_Intern.API
+      dockerfile: Dockerfile
+
+    container_name: rasyonet-api
+
+    ports:
+      - "5010:8080"
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: "http://+:8080"
+
+      # Connects to local MSSQL on the host machine.
+      # Put the real value in an ignored .env file or in your terminal environment.
+      SqlDbSettings__ConnectionString: "${LOCAL_SQL_CONNECTION_STRING:?Set LOCAL_SQL_CONNECTION_STRING before starting Docker Compose}"
+
+      # Connects to local MongoDB on the host machine.
+      # replicaSet=rs0 is required because MongoDB Change Streams power SignalR updates.
+      MongoDbSettings__ConnectionString: "${LOCAL_MONGODB_CONNECTION_STRING:?Set LOCAL_MONGODB_CONNECTION_STRING before starting Docker Compose}"
+      MongoDbSettings__DatabaseName: "${MONGODB_DATABASE:?Set MONGODB_DATABASE before starting Docker Compose}"
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./Rasyonet_Intern.UI
+      dockerfile: Dockerfile
+
+    container_name: rasyonet-ui
+
+    ports:
+      - "5173:5173"
+
+    environment:
+      VITE_API_BASE_URL: "${VITE_API_BASE_URL:?Set VITE_API_BASE_URL before starting Docker Compose}"
+      VITE_SIGNALR_URL: "${VITE_SIGNALR_URL:?Set VITE_SIGNALR_URL before starting Docker Compose}"
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:5173 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s

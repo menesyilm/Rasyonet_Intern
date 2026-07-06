@@ -31,22 +31,21 @@ services:
       # Bu sayede Swagger gibi development özellikleri aktif kalır.
       ASPNETCORE_ENVIRONMENT: Development
 
-      # MSSQL
-      # Bunu eklerken appsettings.json kalmalı mı? sorusu -> evet kalmalı çünkü localde çalışırken
-      # windows authentication kullanmaya devam edelim diye.
-      SqlDbSettings__ConnectionString: "Server=mssql,1433;Database=Rasyonet_Intern;User Id=sa;Password=Rasyonet123!;TrustServerCertificate=True;Encrypt=False;"
+      # Docker Compose bu değeri appsettings.json üzerine yazar.
+      # appsettings.json kalır; Docker dışı local dotnet run senaryosu için kullanılır.
+      SqlDbSettings__ConnectionString: "Server=${DOCKER_SQL_HOST:?Set DOCKER_SQL_HOST in .env};Database=${SQL_DATABASE:?Set SQL_DATABASE in .env};User Id=${SQL_USER:?Set SQL_USER in .env};Password=${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env};TrustServerCertificate=True;Encrypt=False;"
 
       # Backend container içinde 8080 portunu dinlesin.
       # + işareti tüm network interface'lerinden gelen istekleri kabul et demektir.
-      ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_URLS: "http://+:8080"
 
       # Backend Docker içinde çalıştığı için localhost MongoDB'yi göstermez.
       # localhost, backend container'ın kendisidir.
       #
       # Change Stream kullandığın için replicaSet=rs0 kalıyor.
-      MongoDbSettings__ConnectionString: "mongodb://mongodb:27017/?replicaSet=rs0"
+      MongoDbSettings__ConnectionString: "${DOCKER_MONGODB_CONNECTION_STRING:?Set DOCKER_MONGODB_CONNECTION_STRING in .env}"
       # appsettings.json içindeki MongoDbSettings:DatabaseName değerini override eder.
-      MongoDbSettings__DatabaseName: Rasyonet_Intern
+      MongoDbSettings__DatabaseName: "${MONGODB_DATABASE:?Set MONGODB_DATABASE in .env}"
 
     depends_on:
       mssql:
@@ -102,11 +101,11 @@ services:
       # React kodu browser'da çalıştığı için backend'e localhost:5010 üzerinden gider.
       # Burada backend:8080 yazmıyoruz çünkü istek container içinden değil,
       # kullanıcının tarayıcısından çıkıyor.
-      VITE_API_BASE_URL: http://localhost:5010/api
+      VITE_API_BASE_URL: "${VITE_API_BASE_URL:?Set VITE_API_BASE_URL in .env}"
 
       # SignalR Hub adresi.
       # Backend tarafında app.MapHub<DashboardHub>("/hubs/dashboard") olduğu için bu path doğru.
-      VITE_SIGNALR_URL: http://localhost:5010/hubs/dashboard
+      VITE_SIGNALR_URL: "${VITE_SIGNALR_URL:?Set VITE_SIGNALR_URL in .env}"
 
     # Frontend container'ı backend sadece "başladı" diye değil,
     # backend healthcheck'ten geçtiğinde başlatılsın.
@@ -136,10 +135,10 @@ services:
       ACCEPT_EULA: "Y"
       # Docker içindeki MSSQL'de Windows Authentication kullanmıyoruz.
       # Bunun yerine SQL Authentication kullanıyoruz.
-      MSSQL_SA_PASSWORD: "Rasyonet123!"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env}"
       # SQL Server edition seçimi.
       # Developer edition geliştirme ortamı için ücretsiz ve yeterlidir.
-      MSSQL_PID: "Developer"
+      MSSQL_PID: "${MSSQL_PID:?Set MSSQL_PID in .env}"
     ports:
       - "1433:1433"
       # Volume kullanmamızın sebebi veritabanı verilerini kalıcı hale getirmek.

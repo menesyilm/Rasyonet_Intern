@@ -92,6 +92,7 @@ Rasyonet_Intern, satış ve kategori verilerini yöneten bir dashboard uygulamas
 - Frontend chart yenilemesi SignalR eventleriyle tetiklenir.
 - Quartz, SQL -> MongoDB senkronizasyonunu zamanlamak için kullanılır.
 - Docker ortamında API host portu `5010`, UI host portu `5173` olarak kullanılır.
+- `docker-compose.local-db.yml`, DB containerlarını silmeden sadece API/UI containerlarını çalıştırır; API local MSSQL ve local MongoDB'ye `host.docker.internal` üzerinden bağlanır.
 - Development ortamında Swagger aktiftir.
 - OpenTelemetry tracing API, HTTP client ve MongoDB driver instrumentation için kuruludur.
 - AI deney sayfalarında ortak header, tab ve ikon yapıları `ReportChrome` benzeri paylaşımlı component ile toplanır; bu yaklaşım tekrar eden UI kodunu azaltır ve rapor sayfaları arasında tutarlılığı artırır.
@@ -145,8 +146,25 @@ npm run build
 
 Docker Compose:
 
+Compose dosyaları `.env` dosyasındaki değişkenleri kullanır. Örnek değerler için `.env.example` dosyasına bakılmalı, gerçek şifre ve connection string değerleri sadece git'e eklenmeyen `.env` dosyasında tutulmalıdır.
+
+Tüm Docker ortamını başlatmak için:
+
 ```bash
 docker compose up --build
+```
+
+Local DB kullanarak sadece API ve UI containerlarını başlatmak için:
+
+```bash
+docker compose -f docker-compose.local-db.yml up --build
+```
+
+`docker-compose.local-db.yml` çalışmadan önce `LOCAL_SQL_CONNECTION_STRING` ve `LOCAL_MONGODB_CONNECTION_STRING` değerleri private `.env` dosyasında veya terminal environment'ında tanımlı olmalıdır. SignalR chart yenilemesi için local MongoDB replica set modunda `rs0` olarak çalışmalıdır.
+
+Docker ortamını kapatmak için:
+
+```bash
 docker compose down
 docker compose down -v
 ```
