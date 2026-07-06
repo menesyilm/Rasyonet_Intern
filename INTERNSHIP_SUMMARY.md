@@ -173,3 +173,101 @@ Bu doküman, staj sürecinde haftalık olarak yapılan çalışmaları, teknik a
 ### 2. Hafta Değerlendirmesi
 
 İkinci hafta, projenin daha gerçekçi kullanım senaryolarına yaklaştırılması üzerine geçti. Test, performans, veri senkronizasyonu, cache yönetimi, realtime bildirim ve container yönetimi gibi konular ele alındı. Bu çalışmalarla proje yalnızca çalışan bir dashboard olmaktan çıkarılıp daha sürdürülebilir, izlenebilir ve operasyonel olarak yönetilebilir bir yapıya taşınmaya başladı.
+
+## 3. Hafta - Docker Ortamı, Yapay Zeka Kullanımı, MCP/Figma Karşılaştırmaları ve Mobil Uygulama Çalışmaları
+
+Üçüncü hafta Docker ortamının daha stabil hale getirilmesi, yapay zeka araçlarının daha verimli kullanılması, Figma tasarımlarının MCP ve Codex üzerinden projeye aktarılması, farklı model/skill çıktılarının karşılaştırılması ve React Native Expo ile mobil uygulama geliştirme üzerine çalışmalar yapıldı.
+
+<details>
+<summary>Gün 1 - Docker Alert Sistemi, README ve Veritabanı Container Hazırlıkları</summary>
+
+* Docker Desktop üzerinde çalışan servislerin durumunu takip edebilmek için alert sistemi araştırıldı.
+* Container’ların hem çalışır durumda hem de durduğu senaryolarda nasıl izlenebileceği değerlendirildi.
+* Canlı ve test ortamları için ayrı Dockerfile dosyaları kullanılabileceği not edildi.
+* Proje dokümantasyonu için README.md dosyası oluşturulması planlandı.
+* MSSQL ve MongoDB için Docker Desktop üzerinde container oluşturma süreci ele alındı.
+* Veritabanı servislerinin container yapısında nasıl yönetileceği üzerine çalışma yapıldı.
+
+</details>
+
+<details>
+<summary>Gün 2 - Yapay Zeka Kullanımı, Prompt ve Token Optimizasyonu</summary>
+
+* Yapay zeka araçlarının yazılım geliştirme sürecinde daha etkili nasıl kullanılabileceği araştırıldı.
+* Prompt yazarken görev tanımının, bağlamın ve beklenen çıktının net verilmesi gerektiği değerlendirildi.
+* Token tüketimini azaltmak için gereksiz dosya, açıklama ve tekrarların promptlardan çıkarılması gerektiği incelendi.
+* Büyük görevleri tek seferde vermek yerine daha küçük ve kontrollü parçalara bölmenin daha verimli olduğu görüldü.
+* AI destekli geliştirme sürecinde doğru bağlam verme, çıktı sınırlandırma ve karşılaştırmalı test yapma yaklaşımları incelendi.
+
+</details>
+
+<details>
+<summary>Gün 3 - Figma MCP, Codex Karşılaştırmaları ve Docker Sorunlarının Çözülmesi</summary>
+
+* Figma üzerinden seçilen bir tasarım dosyasının MCP ile Codex’e aktarılması ve projede uygulanması üzerine çalışma yapıldı.
+* Figma tasarımının MCP aracılığıyla okunup kod tarafına yansıtılması test edildi.
+* Aynı görseller üzerinden üç farklı yaklaşım karşılaştırıldı:
+
+  * Skill kullanılarak yapılan çıktı
+  * Düz Codex ile yapılan çıktı
+  * Özel hazırlanmış skill ile yapılan çıktı
+* Bu yaklaşımların token kullanımı ve çıktı kalitesi açısından karşılaştırılması planlandı.
+* Karşılaştırma sonuçlarının daha okunabilir olması için kıyaslamalı HTML raporu ekletildi.
+* Docker tarafında yaşanan çalışmama probleminin, önceki build çıktılarının kalmasından kaynaklandığı tespit edildi.
+* Eski build kaynaklı problem düzeltilerek container yapısı tekrar çalışır hale getirildi.
+* MongoDB’nin replica set modunda çalışabilmesi için docker-compose yapısına `Rasyonet-mongodb-init` klasörü eklendi.
+* Local MongoDB’deki veriler Docker içerisindeki MongoDB container’ına taşındı.
+* Bu sayede Docker ortamındaki MongoDB’nin proje için gerekli verilerle çalışması sağlandı.
+
+</details>
+
+<details>
+<summary>Gün 4 - Mobil Görünüm İyileştirmesi ve Model Karşılaştırma Raporları</summary>
+
+* Performans tablosunda fon kodu alanının mobil görünümde sol tarafa sabitlenmesi üzerine çalışma yapıldı.
+* Mobil ekranda yatay scroll sırasında fon kodunun kaybolmaması sağlandı.
+* Böylece kullanıcı scroll yaptığında hangi satırdaki fona baktığını daha rahat takip edebilir hale geldi.
+* Kıyaslamalı rapor yapısı projeye ekletildi.
+* GPT 5.5, GPT 5.4 ve Haiku 4.5 çıktıları için karşılaştırmalı sayfalar oluşturuldu.
+* Farklı modellerin aynı görsel/tasarım görevi üzerindeki performansı, çıktı kalitesi ve uygulanabilirliği karşılaştırıldı.
+
+</details>
+
+<details>
+<summary>Gün 5 - Excel Frozen Column ve React Native Expo Mobil Uygulama</summary>
+
+* Excel çıktılarında ilk sütunun sabit kalması için sticky yaklaşımı yerine frozen column mantığı değerlendirildi.
+* Backend tarafında Excel üretiminde ilk sütunun sabitlenmesi için gerekli yapı araştırıldı.
+* React Native Expo ile mobil uygulama projesi oluşturuldu.
+* Varsayılan Expo ekranı `npx expo start` komutu ile çalıştırıldı.
+* Expo Go uygulaması ile aynı ağ üzerinden mobil cihazda projeyi çalıştırma süreci test edildi.
+* Mobil proje içerisinden API controller endpointlerine istek atıldı.
+* UI tarafındaki Categories sayfasına benzer bir ekran React Native ile mobil uygulama için oluşturuldu.
+* İnternet ağı değiştiğinde bilgisayarın IPv4 adresinin de değiştiği ve mobil uygulamanın API’ye erişmesi için base URL’in buna göre güncellenmesi gerektiği anlaşıldı.
+* Expo projesini web tarafında `http://localhost:8081` üzerinden çalıştırmak istendiğinde CORS ayarlarının gerekli olduğu görüldü.
+
+</details>
+
+### 3. Hafta Teknik Kazanımları
+
+* Docker Desktop üzerinde container durumlarını izleme ve alert sistemi mantığı araştırıldı.
+* Canlı ve test ortamları için ayrı Dockerfile kullanılabileceği değerlendirildi.
+* README.md ile proje dokümantasyonu hazırlama süreci ele alındı.
+* MSSQL ve MongoDB container yapıları üzerinde çalışma yapıldı.
+* Yapay zeka araçlarında prompt kalitesi, bağlam yönetimi ve token optimizasyonu üzerine araştırma yapıldı.
+* Figma tasarımlarının MCP ve Codex aracılığıyla projeye aktarılması test edildi.
+* Skill, düz Codex ve özel skill yaklaşımları çıktı kalitesi ve token kullanımı açısından karşılaştırıldı.
+* Karşılaştırmalı HTML rapor yapısı projeye dahil edildi.
+* Docker build kaynaklı problem tespit edilip düzeltildi.
+* MongoDB’nin replica set modunda çalışması için init yapısı oluşturuldu.
+* Local MongoDB verileri Docker MongoDB container’ına taşındı.
+* Mobil görünümde fon kodu alanının sabit kalması sağlandı.
+* GPT 5.5, GPT 5.4 ve Haiku 4.5 için karşılaştırmalı rapor sayfaları oluşturuldu.
+* Excel çıktılarında ilk sütunun sabit kalması için frozen column yaklaşımı araştırıldı.
+* React Native Expo projesi oluşturuldu.
+* Mobil uygulamadan API endpointlerine istek atıldı.
+* Expo Go, IPv4 adresi, local network erişimi ve CORS konuları uygulamalı olarak değerlendirildi.
+
+### 3. Hafta Değerlendirmesi
+
+Üçüncü hafta, projenin yalnızca web dashboard tarafıyla sınırlı kalmayıp farklı geliştirme ve kullanım senaryolarına genişletildiği bir hafta oldu. Docker ortamındaki problemler giderilirken, MongoDB’nin replica set modunda çalışması için gerekli yapı güçlendirildi. Yapay zeka araçlarının daha verimli kullanılması, token tüketiminin azaltılması ve farklı model çıktılarının karşılaştırılması üzerine çalışmalar yapıldı. Ayrıca React Native Expo ile mobil uygulama geliştirme sürecine başlanarak API verilerinin mobil tarafta da kullanılabileceği test edildi.

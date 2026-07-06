@@ -87,6 +87,18 @@ builder.Services.AddQuartzHostedService(options =>
 });
 // SignalR
 builder.Services.AddSignalR();
+//Backend ile Mobile uygulama arasında CORS ayarları -> Cross-Origin Resource Sharing
+//Mobil uygulamayı browser üzerinden test ederken CORS hatası almamak için bu ayarları ekliyoruz.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowMobileDev", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 // CORS ayarları -> Cross-Origin Resource Sharing
 builder.Services.AddCors(options =>
 {
@@ -141,6 +153,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowReactApp");
+app.UseCors("AllowMobileDev");
 
 app.UseAuthorization();
 

@@ -9,7 +9,6 @@ namespace Rasyonet_Intern.Test.IntegrationTests
     public class SaleRepositoryComparisonIntegrationTests
     {
         private const string ConnectionString = "mongodb://localhost:27017";
-
         private string _databaseName = string.Empty;
         private MongoClient _mongoClient = null!;
         private SaleRepository _repository = null!;
