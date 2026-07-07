@@ -63,7 +63,7 @@ var database = mongoClient.GetDatabase(
     builder.Configuration["MongoDbSettings:DatabaseName"]);
 
 builder.Services.AddSingleton<IMongoDatabase>(database);
-builder.Services.AddSingleton<MongoDbContext>();
+builder.Services.AddSingleton<MongoDbContext>(); //Addsingleton -> Uygulama ayağa kalkınca kapatıncaya kadar.
 // JWT Authentication
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("JwtSettings"));

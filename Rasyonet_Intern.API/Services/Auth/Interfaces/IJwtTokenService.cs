@@ -1,6 +1,6 @@
 ﻿using Rasyonet_Intern.API.Documents;
 
-namespace Rasyonet_Intern.API.Services.Auth.Implementations
+namespace Rasyonet_Intern.API.Services.Auth.Interfaces
 {
     public interface IJwtTokenService
     {
