@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+using AutoMapper;
+using MongoDB.Driver;
 using Rasyonet_Intern.API.Documents;
 using Rasyonet_Intern.API.DTOs.Auth;
 using Rasyonet_Intern.API.Repositories.Interfaces;
@@ -11,12 +12,20 @@ namespace Rasyonet_Intern.API.Services.Auth.Implementations
         private readonly IUserRepository _userRepository;
         private readonly IPasswordService _passwordService;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly IMapper _mapper;
 
-        public AuthService(IUserRepository userRepository, IPasswordService passwordService, IJwtTokenService jwtTokenService)
+        public AuthService(IUserRepository userRepository, IPasswordService passwordService, IJwtTokenService jwtTokenService, IMapper mapper)
         {
             _userRepository = userRepository;
             _passwordService = passwordService;
             _jwtTokenService = jwtTokenService;
+            _mapper = mapper;
+        }
+
+        public async Task<IReadOnlyList<UserResponseDto>> GetAllUsersAsync()
+        {
+            var users = await _userRepository.GetAllAsync();
+            return _mapper.Map<List<UserResponseDto>>(users);
         }
 
         public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)
@@ -35,18 +44,7 @@ namespace Rasyonet_Intern.API.Services.Auth.Implementations
 
             var token = _jwtTokenService.GenerateToken(user, out var expiresAt);
 
-            return new AuthResponseDto
-            {
-                AccessToken = token,
-                ExpiresAt = expiresAt,
-                User = new UserResponseDto
-                {
-                    Id = user.Id ?? string.Empty,
-                    Name = user.Name,
-                    Surname = user.Surname,
-                    Email = user.Email
-                }
-            };
+            return CreateAuthResponse(user, token, expiresAt);
         }
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request)
@@ -58,14 +56,8 @@ namespace Rasyonet_Intern.API.Services.Auth.Implementations
             if (emailExists)
                 throw new InvalidOperationException("Bu email adresi zaten kullanılıyor.");
 
-            var user = new UserDocument
-            {
-                Name = request.Name.Trim(),
-                Surname = request.Surname.Trim(),
-                Email = normalizedEmail,
-                CreatedAt = DateTime.UtcNow
-            };
-
+            var user = _mapper.Map<UserDocument>(request);
+            user.Email = normalizedEmail;
             user.PasswordHash = _passwordService.HashPassword(user, request.Password);
 
             try
@@ -80,17 +72,16 @@ namespace Rasyonet_Intern.API.Services.Auth.Implementations
 
             var token = _jwtTokenService.GenerateToken(user, out var expiresAt);
 
+            return CreateAuthResponse(user, token, expiresAt);
+        }
+
+        private AuthResponseDto CreateAuthResponse(UserDocument user, string token, DateTime expiresAt)
+        {
             return new AuthResponseDto
             {
                 AccessToken = token,
                 ExpiresAt = expiresAt,
-                User = new UserResponseDto
-                {
-                    Id = user.Id ?? string.Empty,
-                    Name = user.Name,
-                    Surname = user.Surname,
-                    Email = user.Email
-                }
+                User = _mapper.Map<UserResponseDto>(user)
             };
         }
     }

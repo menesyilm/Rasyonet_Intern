@@ -14,6 +14,12 @@ namespace Rasyonet_Intern.API.Controllers
         {
             _authService = authService;
         }
+        [HttpGet("get-all-users")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _authService.GetAllUsersAsync();
+            return Ok(users);
+        }
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequestDto request)
         {

@@ -18,6 +18,14 @@ namespace Rasyonet_Intern.API.Repositories.Implementations
             await _context.Users.InsertOneAsync(user);
         }
 
+        public async Task<IReadOnlyList<UserDocument>> GetAllAsync()
+        {
+            return await _context.Users
+                .Find(Builders<UserDocument>.Filter.Empty)
+                .SortByDescending(x => x.CreatedAt)
+                .ToListAsync();
+        }
+
         public async Task<bool> ExistsByEmailAsync(string email)
         {
             return await _context.Users

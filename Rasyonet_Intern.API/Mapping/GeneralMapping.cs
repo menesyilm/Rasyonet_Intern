@@ -1,5 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Rasyonet_Intern.API.Documents;
+using Rasyonet_Intern.API.DTOs.Auth;
 using Rasyonet_Intern.API.Entities;
 
 namespace Rasyonet_Intern.API.Mapping
@@ -25,6 +26,17 @@ namespace Rasyonet_Intern.API.Mapping
                     string.IsNullOrWhiteSpace(src.Tags)
                         ? new List<string>()
                         : src.Tags.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList()));
+
+            CreateMap<RegisterRequestDto, UserDocument>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name.Trim()))
+                .ForMember(dest => dest.Surname, opt => opt.MapFrom(src => src.Surname.Trim()))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Trim().ToLower()))
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
+
+            CreateMap<UserDocument, UserResponseDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id ?? string.Empty));
         }
     }
 }

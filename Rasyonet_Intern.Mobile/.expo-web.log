@@ -1,0 +1,21 @@
+
+> rasyonet_intern.mobile@1.0.0 web
+> expo start --web --port 8081
+
+Starting project at C:\Users\enssy\OneDrive\Desktop\Staj\Rasyonet_Intern\Rasyonet_Intern.Mobile
+React Compiler enabled
+Starting Metro Bundler
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 56.6% (364/484)
+λ node_modules\expo-router\node\render.js ▓▓▓▓▓▓▓▓▓▓▓░░░░░ 70.5% (466/555)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.7% (759/761)
+λ node_modules\expo-router\node\render.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.7% (788/789)
+λ Bundled 6248ms node_modules\expo-router\node\render.js (789 modules)
+Web Bundled 8022ms node_modules\expo-router\entry.js (761 modules)
+Web Bundled 500ms node_modules\expo-router\entry.js (762 modules)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 46ms node_modules\expo-router\node\render.js (1 module)
+Web Bundled 394ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 41ms node_modules\expo-router\entry.js (1 module)

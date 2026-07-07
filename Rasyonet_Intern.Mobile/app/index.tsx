@@ -1,51 +1,68 @@
-import { useEffect, useMemo, useState } from 'react'
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native'
-// ActivityIndicator -> React Web'de loading spinner/component mantığına karşılık gelir.
-// StyleSheet        -> React Web'deki CSS/className yerine kullanılır.
-import { getCategories } from '@/services/categoryService'
-import { Category, Performance } from '@/types/category'
-import PerformanceCard from '@/components/performance/PerformanceCard'
+import { useEffect, useMemo, useState } from 'react';
+import {
+    ActivityIndicator,
+    FlatList,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+} from 'react-native';
+import PerformanceCard from '@/components/performance/PerformanceCard';
+import { getCategories } from '@/services/categoryService';
+import { useAuthSession } from '@/services/authSession';
+import { Category, Performance } from '@/types/category';
 
 export default function IndexScreen() {
-    const [categories, setCategories] = useState<Category[]>([])
-    const [isLoading, setIsLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const { signOut } = useAuthSession();
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSigningOut, setIsSigningOut] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        let isActive = true
+        let isActive = true;
 
         async function loadCategories() {
             try {
-                setIsLoading(true)
-                setError(null)
+                setIsLoading(true);
+                setError(null);
 
-                const data = await getCategories()
+                const data = await getCategories();
 
-                if (!isActive) return
+                if (!isActive) return;
 
-                setCategories(data)
+                setCategories(data);
             } catch (err) {
-                if (!isActive) return
+                if (!isActive) return;
 
-                console.error(err)
-                setError('Performans verileri alınamadı.')
+                console.error(err);
+                setError('Performans verileri alınamadı.');
             } finally {
                 if (isActive) {
-                    setIsLoading(false)
+                    setIsLoading(false);
                 }
             }
         }
 
-        loadCategories()
+        loadCategories();
 
         return () => {
-            isActive = false
-        }
-    }, [])
+            isActive = false;
+        };
+    }, []);
 
     const performances = useMemo<Performance[]>(() => {
-        return categories.flatMap(category => category.performances ?? [])
-    }, [categories])
+        return categories.flatMap(category => category.performances ?? []);
+    }, [categories]);
+
+    async function handleSignOut() {
+        try {
+            setIsSigningOut(true);
+            await signOut();
+        } finally {
+            setIsSigningOut(false);
+        }
+    }
 
     if (isLoading) {
         return (
@@ -53,7 +70,7 @@ export default function IndexScreen() {
                 <ActivityIndicator size="large" />
                 <Text>Veriler yükleniyor...</Text>
             </View>
-        )
+        );
     }
 
     if (error) {
@@ -61,12 +78,27 @@ export default function IndexScreen() {
             <View style={styles.center}>
                 <Text style={styles.error}>{error}</Text>
             </View>
-        )
+        );
     }
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Performanslar</Text>
+            <View style={styles.header}>
+                <Text style={styles.title}>Performanslar</Text>
+
+                <Pressable
+                    style={[
+                        styles.signOutButton,
+                        isSigningOut && styles.disabledButton,
+                    ]}
+                    onPress={handleSignOut}
+                    disabled={isSigningOut}
+                >
+                    <Text style={styles.signOutButtonText}>
+                        {isSigningOut ? 'Çıkılıyor...' : 'Çıkış Yap'}
+                    </Text>
+                </Pressable>
+            </View>
 
             <FlatList
                 data={performances}
@@ -79,7 +111,7 @@ export default function IndexScreen() {
                 }
             />
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -89,11 +121,34 @@ const styles = StyleSheet.create({
         padding: 16,
         paddingTop: 48,
     },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+        marginBottom: 16,
+    },
     title: {
+        flexShrink: 1,
         fontSize: 28,
         fontWeight: '700',
         color: '#16a34a',
-        marginBottom: 16,
+    },
+    signOutButton: {
+        minHeight: 40,
+        paddingHorizontal: 14,
+        borderRadius: 8,
+        backgroundColor: '#dc2626',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    disabledButton: {
+        opacity: 0.7,
+    },
+    signOutButtonText: {
+        color: '#ffffff',
+        fontSize: 14,
+        fontWeight: '700',
     },
     center: {
         flex: 1,
@@ -105,4 +160,4 @@ const styles = StyleSheet.create({
         color: 'red',
         fontSize: 16,
     },
-})
+});

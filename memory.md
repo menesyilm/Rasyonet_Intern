@@ -184,3 +184,48 @@ k6 run stress-test/load-test.js
 ```
 
 Stres testi satış chart endpointlerini hedefler.
+
+## Auth, JWT ve Mobile Klasör Yapısı
+
+Backend auth/JWT klasörleri:
+
+- `Rasyonet_Intern.API/Controllers/UsersController.cs`: register, login ve kullanıcı listeleme endpointleri.
+- `Rasyonet_Intern.API/Controllers/ProfilesController.cs`: JWT ile giriş yapmış kullanıcının profil bilgilerini dönen endpoint.
+- `Rasyonet_Intern.API/DTOs/Auth/`: login, register, auth response ve user response DTO modelleri.
+- `Rasyonet_Intern.API/Services/Auth/`: auth, password hashing ve JWT token üretim servisleri.
+- `Rasyonet_Intern.API/Settings/JwtSettings.cs`: JWT issuer, audience, secret ve expiration ayarları.
+
+Mobile auth klasörleri:
+
+- `Rasyonet_Intern.Mobile/`: Expo Router tabanlı mobil/web istemci.
+- `Rasyonet_Intern.Mobile/app/`: Expo Router route dosyaları.
+- `Rasyonet_Intern.Mobile/app/auth/`: login ve register ekranları.
+- `Rasyonet_Intern.Mobile/services/`: mobile API client, auth session ve token storage servisleri.
+- `Rasyonet_Intern.Mobile/types/`: mobile tarafında kullanılan TypeScript modelleri.
+
+Auth endpointleri:
+
+- `POST /api/Users/register`
+- `POST /api/Users/login`
+- `GET /api/Users/get-all-users`
+- `GET /api/Profiles/me`: JWT Bearer token ister; token claimlerinden kullanıcı id, email ve ad bilgisini döner.
+
+Auth mimari kararlar:
+
+- Auth akışı `UsersController -> IAuthService/AuthService -> IUserRepository/UserRepository` hattından ilerler.
+- Register ve login response modelleri `AuthResponseDto`, kullanıcı dış response modeli `UserResponseDto` üzerinden döner; `PasswordHash` API response olarak dışarı verilmez.
+- `AuthService`, auth DTO/document dönüşümlerinde AutoMapper kullanır. `RegisterRequestDto -> UserDocument` ve `UserDocument -> UserResponseDto` mappingleri `GeneralMapping` içindedir.
+- JWT token `JwtTokenService` tarafından üretilir; token claimleri `NameIdentifier`, `Email` ve `Name` bilgisini taşır.
+- `[Authorize]` ile korunan endpointlerde JWT Bearer token gerekir; `GET /api/Profiles/me` token içindeki kullanıcı claimlerini okumak için kullanılır.
+- Mobile auth guard Expo Router `Stack.Protected` ve `AuthSessionProvider` ile yönetilir. Token yoksa auth ekranları, token varsa `index` performans sayfası açılır.
+- Mobile login başarılı olunca token saklanır ve performans sayfasına geçilir. Register başarılı olunca otomatik giriş yaptırılmaz; kullanıcı login ekranına yönlendirilir.
+- Mobile token storage native ortamda `expo-secure-store`, web ortamında `localStorage` kullanır.
+- Mobile web API adresi `http://localhost:5010/api`, native/mobile cihaz API adresi LAN IP üzerinden tanımlanır.
+
+Mobile çalıştırma:
+
+```bash
+cd Rasyonet_Intern.Mobile
+npm install
+npm run web
+```
