@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Extensions.DiagnosticSources;
 using OpenTelemetry.Exporter;
@@ -12,8 +14,12 @@ using Rasyonet_Intern.API.Jobs;
 using Rasyonet_Intern.API.Repositories.Implementations;
 using Rasyonet_Intern.API.Repositories.Interfaces;
 using Rasyonet_Intern.API.Services;
+using Rasyonet_Intern.API.Services.Auth.Implementations;
+using Rasyonet_Intern.API.Services.Auth.Interfaces;
 using Rasyonet_Intern.API.Services.BackgroundServices;
 using Rasyonet_Intern.API.Services.Cache;
+using Rasyonet_Intern.API.Settings;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +64,41 @@ var database = mongoClient.GetDatabase(
 
 builder.Services.AddSingleton<IMongoDatabase>(database);
 builder.Services.AddSingleton<MongoDbContext>();
+// JWT Authentication
+builder.Services.Configure<JwtSettings>(
+    builder.Configuration.GetSection("JwtSettings"));
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<IPasswordService, PasswordService>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+var jwtSettings = builder.Configuration
+    .GetSection("JwtSettings")
+    .Get<JwtSettings>();
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = jwtSettings!.Issuer,
+            ValidAudience = jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings.SecretKey)
+            ),
+
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+builder.Services.AddAuthorization();
 //AutoMapper
 builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);
 // Repositories
@@ -155,6 +196,7 @@ if (!app.Environment.IsDevelopment())
 app.UseCors("AllowReactApp");
 app.UseCors("AllowMobileDev");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
