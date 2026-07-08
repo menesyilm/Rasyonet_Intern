@@ -147,14 +147,11 @@ builder.Services.AddCors(options =>
     {
         policy
             .WithOrigins(
-                "http://localhost:5173",
-                "http://localhost:8081",
-                "http://localhost:8082",
-                "http://localhost:19006",
-                "http://127.0.0.1:5173",
-                "http://127.0.0.1:8081",
-                "http://127.0.0.1:8082",
-                "http://127.0.0.1:19006") // Frontend adresleri
+                "http://localhost:5173", //Front end React uygulamasının çalıştığı port
+                "http://localhost:8081", //React Native uygulamasının çalıştığı port
+                "http://localhost:8082", //React Native uygulamasının çalıştığı ikinci port
+                "http://localhost:19006" //Eski Expo Web uygulamasının çalıştığı port
+            )
             .AllowAnyHeader() // Frontend'in request header göndermesine izin verir.
             .AllowAnyMethod() // Frontend'in farklı HTTP methodlarıyla istek atmasına izin verir.
             .AllowCredentials(); // SignalR tarafında özellikle önemlidir.

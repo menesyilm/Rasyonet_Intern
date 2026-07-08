@@ -23,7 +23,7 @@ export async function login(request: LoginRequest): Promise<AuthResponse> {
 
     const data: AuthResponse = await handleResponse(response);
 
-    await saveAccessToken(data.accessToken);
+    await saveAccessToken(data.accessToken, data.expiresAt);
 
     return data;
 }

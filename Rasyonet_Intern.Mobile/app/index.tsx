@@ -1,15 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
-import {
-    ActivityIndicator,
-    FlatList,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
-} from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import PerformanceCard from '@/components/performance/PerformanceCard';
-import { getCategories } from '@/services/categoryService';
+import { getCategories, isAuthRequiredError } from '@/services/categoryService';
 import { useAuthSession } from '@/services/authSession';
+import { getAccessTokenExpiresAt } from '@/services/tokenStorage';
 import { Category, Performance } from '@/types/category';
 
 export default function IndexScreen() {
@@ -18,6 +12,19 @@ export default function IndexScreen() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSigningOut, setIsSigningOut] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const hasHandledSessionExpiredRef = useRef(false);
+
+    const handleSessionExpired = useCallback(() => {
+        if (hasHandledSessionExpiredRef.current) {
+            return;
+        }
+
+        hasHandledSessionExpiredRef.current = true;
+
+        void signOut(
+            'Giriş süreniz doldu. Lütfen tekrar giriş yapınız.',
+        );
+    }, [signOut]);
 
     useEffect(() => {
         let isActive = true;
@@ -35,6 +42,11 @@ export default function IndexScreen() {
             } catch (err) {
                 if (!isActive) return;
 
+                if (isAuthRequiredError(err)) {
+                    handleSessionExpired();
+                    return;
+                }
+
                 console.error(err);
                 setError('Performans verileri alınamadı.');
             } finally {
@@ -49,7 +61,38 @@ export default function IndexScreen() {
         return () => {
             isActive = false;
         };
-    }, []);
+    }, [handleSessionExpired]);
+
+    useEffect(() => {
+        let isActive = true;
+        let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+        async function scheduleSessionExpirationAlert() {
+            const expiresAt = await getAccessTokenExpiresAt();
+
+            if (!isActive || !expiresAt) {
+                return;
+            }
+
+            const remainingMilliseconds = new Date(expiresAt).getTime() - Date.now();
+
+            if (remainingMilliseconds <= 0) {
+                handleSessionExpired();
+                return;
+            }
+
+            timeoutId = setTimeout(handleSessionExpired, remainingMilliseconds);
+        }
+
+        scheduleSessionExpirationAlert();
+
+        return () => {
+            isActive = false;
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+        };
+    }, [handleSessionExpired]);
 
     const performances = useMemo<Performance[]>(() => {
         return categories.flatMap(category => category.performances ?? []);

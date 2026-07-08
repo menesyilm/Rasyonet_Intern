@@ -15,7 +15,12 @@ import { useAuthSession } from '@/services/authSession';
 
 export default function LoginScreen() {
     const router = useRouter();
-    const { isAuthenticated, markAuthenticated } = useAuthSession();
+    const {
+        isAuthenticated,
+        sessionMessage,
+        markAuthenticated,
+        clearSessionMessage,
+    } = useAuthSession();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -31,6 +36,7 @@ export default function LoginScreen() {
         try {
             setIsLoading(true);
             setErrorMessage(null);
+            clearSessionMessage();
 
             await login({
                 email,
@@ -87,6 +93,10 @@ export default function LoginScreen() {
 
                 {errorMessage && (
                     <Text style={styles.errorText}>{errorMessage}</Text>
+                )}
+
+                {sessionMessage && !errorMessage && (
+                    <Text style={styles.sessionMessageText}>{sessionMessage}</Text>
                 )}
 
                 <Pressable
@@ -168,6 +178,11 @@ const styles = StyleSheet.create({
     },
     errorText: {
         color: '#d93025',
+        fontSize: 13,
+        marginBottom: 12,
+    },
+    sessionMessageText: {
+        color: '#b45309',
         fontSize: 13,
         marginBottom: 12,
     },

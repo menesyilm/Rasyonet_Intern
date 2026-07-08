@@ -30,15 +30,18 @@ namespace Rasyonet_Intern.API.Services.Auth.Implementations
             // Token'ın geçerlilik süresi hesaplanır.
             // UTC kullanmak önemlidir çünkü sunucu saat farklarından etkilenmemek gerekir.
             expiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes);
+            if (string.IsNullOrWhiteSpace(user.Id))
+                throw new InvalidOperationException("Token üretmek için kullanıcı Id bilgisi zorunludur.");
+
+            if (string.IsNullOrWhiteSpace(user.Email))
+                throw new InvalidOperationException("Token üretmek için kullanıcı email bilgisi zorunludur.");
             // Claim, token içine yazılan kullanıcı bilgileridir.
             var claims = new List<Claim>
             {
                 // Kullanıcının unique Id bilgisini token'a koyuyoruz.
-                new Claim(ClaimTypes.NameIdentifier, user.Id ?? string.Empty),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 // Kullanıcının email bilgisini token'a koyuyoruz.
-                new Claim(ClaimTypes.Email, user.Email),
-                // Kullanıcının ad-soyad bilgisini token'a koyuyoruz.
-                new Claim(ClaimTypes.Name, $"{user.Name} {user.Surname}")
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
             };
             // SecretKey string olarak appsettings.json'da durur.
             // JWT imzalamak için byte array'e çevrilmesi gerekir.

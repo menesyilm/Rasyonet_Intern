@@ -1,20 +1,14 @@
-import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
-    type ReactNode,
-} from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { getAccessToken, removeAccessToken } from '@/services/tokenStorage';
 
 type AuthSessionContextValue = {
     isCheckingAuth: boolean;
     isAuthenticated: boolean;
+    sessionMessage: string | null;
     markAuthenticated: () => void;
     refreshSession: () => Promise<void>;
-    signOut: () => Promise<void>;
+    clearSessionMessage: () => void;
+    signOut: (message?: string) => Promise<void>;
 };
 
 const AuthSessionContext = createContext<AuthSessionContextValue | null>(null);
@@ -22,6 +16,7 @@ const AuthSessionContext = createContext<AuthSessionContextValue | null>(null);
 export function AuthSessionProvider({ children }: { children: ReactNode }) {
     const [isCheckingAuth, setIsCheckingAuth] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [sessionMessage, setSessionMessage] = useState<string | null>(null);
 
     const refreshSession = useCallback(async () => {
         const token = await getAccessToken();
@@ -29,11 +24,17 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const markAuthenticated = useCallback(() => {
+        setSessionMessage(null);
         setIsAuthenticated(true);
     }, []);
 
-    const signOut = useCallback(async () => {
+    const clearSessionMessage = useCallback(() => {
+        setSessionMessage(null);
+    }, []);
+
+    const signOut = useCallback(async (message?: string) => {
         await removeAccessToken();
+        setSessionMessage(message ?? null);
         setIsAuthenticated(false);
     }, []);
 
@@ -65,15 +66,19 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
         () => ({
             isCheckingAuth,
             isAuthenticated,
+            sessionMessage,
             markAuthenticated,
             refreshSession,
+            clearSessionMessage,
             signOut,
         }),
         [
             isCheckingAuth,
             isAuthenticated,
+            sessionMessage,
             markAuthenticated,
             refreshSession,
+            clearSessionMessage,
             signOut,
         ],
     );

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Rasyonet_Intern.API.Repositories.Interfaces;
 
 namespace Rasyonet_Intern.API.Controllers
@@ -14,7 +15,8 @@ namespace Rasyonet_Intern.API.Controllers
             _repository = repository;
         }
 
-        [HttpGet]
+        [Authorize]
+        [HttpPost]
         public async Task<IActionResult> GetAll()
         {
             var result = await _repository.GetAllAsync();
