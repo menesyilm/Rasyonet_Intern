@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import PerformanceCard from '@/components/performance/PerformanceCard';
 import { getCategories, isAuthRequiredError } from '@/services/categoryService';
 import { useAuthSession } from '@/services/authSession';
@@ -7,6 +8,7 @@ import { getAccessTokenExpiresAt } from '@/services/tokenStorage';
 import { Category, Performance } from '@/types/category';
 
 export default function IndexScreen() {
+    const router = useRouter();
     const { signOut } = useAuthSession();
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -152,6 +154,14 @@ export default function IndexScreen() {
                 ListEmptyComponent={
                     <Text>Gösterilecek performans bulunamadı.</Text>
                 }
+                ListFooterComponent={
+                    <Pressable
+                        style={styles.chartButton}
+                        onPress={() => router.push('./charts')}
+                    >
+                        <Text style={styles.chartButtonText}>Charts sayfasına git</Text>
+                    </Pressable>
+                }
             />
         </View>
     );
@@ -169,17 +179,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 12,
-        marginBottom: 16,
+        marginBottom: 12,
     },
     title: {
         flexShrink: 1,
-        fontSize: 28,
+        fontSize: 20,
         fontWeight: '700',
         color: '#16a34a',
     },
     signOutButton: {
-        minHeight: 40,
-        paddingHorizontal: 14,
+        minHeight: 32,
+        paddingHorizontal: 10,
         borderRadius: 8,
         backgroundColor: '#dc2626',
         alignItems: 'center',
@@ -190,7 +200,20 @@ const styles = StyleSheet.create({
     },
     signOutButtonText: {
         color: '#ffffff',
-        fontSize: 14,
+        fontSize: 12,
+        fontWeight: '700',
+    },
+    chartButton: {
+        minHeight: 32,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 8,
+        backgroundColor: '#16a34a',
+        marginTop: 10,
+    },
+    chartButtonText: {
+        color: '#ffffff',
+        fontSize: 12,
         fontWeight: '700',
     },
     center: {
@@ -201,6 +224,6 @@ const styles = StyleSheet.create({
     },
     error: {
         color: 'red',
-        fontSize: 16,
+        fontSize: 12,
     },
 });

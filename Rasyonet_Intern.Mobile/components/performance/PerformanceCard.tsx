@@ -21,22 +21,22 @@ export default function PerformanceCard({ performance }: Props) {
 const styles = StyleSheet.create({
     card: {
         backgroundColor: '#ffffff',
-        padding: 16,
-        borderRadius: 12,
-        marginBottom: 12,
+        padding: 10,
+        borderRadius: 8,
+        marginBottom: 8,
     },
     code: {
         fontWeight: '700',
-        fontSize: 15,
-        marginBottom: 4,
+        fontSize: 11,
+        marginBottom: 3,
     },
     name: {
-        fontSize: 16,
+        fontSize: 11,
         fontWeight: '600',
-        marginBottom: 8,
+        marginBottom: 5,
     },
     text: {
-        fontSize: 14,
-        marginBottom: 3,
+        fontSize: 11,
+        marginBottom: 2,
     },
 })  

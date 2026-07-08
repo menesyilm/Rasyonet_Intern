@@ -45,6 +45,12 @@ function RootNavigator() {
             title: 'Performanslar',
           }}
         />
+        <Stack.Screen
+          name="charts"
+          options={{
+            title: 'Charts',
+          }}
+        />
       </Stack.Protected>
     </Stack>
   );

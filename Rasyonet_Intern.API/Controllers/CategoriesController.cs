@@ -15,6 +15,14 @@ namespace Rasyonet_Intern.API.Controllers
             _repository = repository;
         }
 
+        [AllowAnonymous]
+        [HttpGet("public")]
+        public async Task<IActionResult> GetAllCategories()
+        {
+            var result = await _repository.GetAllAsync();
+            return Ok(result);
+        }
+
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> GetAll()
@@ -22,6 +30,7 @@ namespace Rasyonet_Intern.API.Controllers
             var result = await _repository.GetAllAsync();
             return Ok(result);
         }
+
         [HttpGet("chart")]
         public async Task<IActionResult> GetChartData()
         {
