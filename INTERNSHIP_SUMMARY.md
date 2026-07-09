@@ -271,3 +271,97 @@ Bu doküman, staj sürecinde haftalık olarak yapılan çalışmaları, teknik a
 ### 3. Hafta Değerlendirmesi
 
 Üçüncü hafta, projenin yalnızca web dashboard tarafıyla sınırlı kalmayıp farklı geliştirme ve kullanım senaryolarına genişletildiği bir hafta oldu. Docker ortamındaki problemler giderilirken, MongoDB’nin replica set modunda çalışması için gerekli yapı güçlendirildi. Yapay zeka araçlarının daha verimli kullanılması, token tüketiminin azaltılması ve farklı model çıktılarının karşılaştırılması üzerine çalışmalar yapıldı. Ayrıca React Native Expo ile mobil uygulama geliştirme sürecine başlanarak API verilerinin mobil tarafta da kullanılabileceği test edildi.
+
+## 4. Hafta - Local MongoDB Yapılandırması, JWT Authentication ve React Native Chart Çalışmaları
+
+Dördüncü hafta Docker ortamında local MongoDB kullanımının düzenlenmesi, ortam değişkenlerinin güvenli hale getirilmesi, React Native tarafında login/register akışının oluşturulması, JWT tabanlı authentication yapısının backend ve mobil uygulama ile entegre edilmesi, protected endpoint kullanımı ve mobil chart kütüphanesi araştırmaları üzerine çalışmalar yapıldı.
+
+<details>
+<summary>Gün 1 - Local MongoDB Kullanımı, Environment Yapısı ve Kod İncelemesi</summary>
+
+* Docker içerisindeki MongoDB yerine local MongoDB kullanımı için ayrı bir `docker-compose.yml` dosyası oluşturuldu.
+* Docker Compose içerisinde doğrudan yazılan password ve benzeri hassas konfigürasyon değerleri `.env` dosyasına taşındı.
+* Kullanıcının hangi environment değişkenlerini tanımlaması gerektiğini görebilmesi için `.env.example` dosyası oluşturuldu.
+* `Internship_summary.md` dosyasına üçüncü hafta özeti eklendi.
+* Projedeki kodlar genel olarak gözden geçirildi.
+* Kod yapısı, klasör organizasyonu, okunabilirlik ve sürdürülebilirlik açısından incelendi.
+
+</details>
+
+<details>
+<summary>Gün 2 - React Native Login/Register Ekranları ve JWT Authentication</summary>
+
+* React Native tarafında login ve register ekranlarının oluşturulması üzerine çalışma yapıldı.
+* Mobil uygulamada authentication akışının nasıl kurulacağı değerlendirildi.
+* Register ekranı ile kullanıcı oluşturma süreci mobil tarafa eklendi.
+* Login ekranı ile kullanıcının backend üzerinden kimlik doğrulaması yapması sağlandı.
+* Backend tarafında JWT tabanlı authentication yapısı kuruldu.
+* JWT üretimi ve doğrulaması için `System.IdentityModel.Tokens.Jwt` ve `Microsoft.AspNetCore.Authentication.JwtBearer` kütüphaneleri kullanıldı.
+* JWT’nin mobil tarafta güvenli şekilde saklanabilmesi için `expo-secure-store` kullanıldı.
+* JWT kullanılmasının temel amacı, her endpoint isteğinde kullanıcının email ve şifresini tekrar göndermek yerine backend’in kullanıcıyı token üzerinden güvenli şekilde tanıyabilmesini sağlamaktır.
+* UI tarafında bulunan Pie Chart ekranının React Native tarafında nasıl karşılanabileceği araştırıldı.
+* amCharts 5’in React Native için doğrudan uygun olmaması nedeniyle alternatif chart kütüphaneleri incelendi.
+
+</details>
+
+<details>
+<summary>Gün 3 - Protected Endpoint, Token Expire Kontrolü ve Storage Yapısı</summary>
+
+* Login işlemi sonrasında alınan token’ın kullanım akışı gözden geçirildi.
+* Categories sayfasında daha önce GET metodu ile veri çekilen yapı, JWT kontrolü yapılacak şekilde yeniden düzenlendi.
+* Token geçerliliğinin backend tarafından kontrol edilebilmesi için ilgili endpoint `POST` olarak güncellendi.
+* Endpoint’e `[Authorize]` ve `[HttpPost]` attribute’ları eklendi.
+* Böylece token süresi dolduğunda backend’in yetkisiz istek dönmesi ve mobil uygulamanın kullanıcıyı tekrar login ekranına yönlendirmesi hedeflendi.
+* Expo projesi web ortamında çalışırken JWT saklama işlemi için `localStorage` kullanımı değerlendirildi.
+* Mobil ortamda JWT’nin `expo-secure-store` üzerinden cihazın güvenli depolama alanında tutulması sağlandı.
+* `localStorage` yapısının yalnızca token için değil; dil seçimi, tema seçimi ve benzeri kalıcı kullanıcı tercihleri için de kullanılabileceği not edildi.
+* Web ve mobil ortamda token saklama yöntemlerinin farklılaşması gerektiği görüldü.
+
+</details>
+
+<details>
+<summary>Gün 4 - React Native Chart Kütüphanesi Araştırması ve Pie Chart Ekranı</summary>
+
+* UI tarafında bulunan Pie Chart sayfasının React Native tarafında nasıl geliştirilebileceği üzerine araştırma yapıldı.
+* amCharts 5 yerine React Native ile daha uyumlu chart kütüphaneleri incelendi.
+* `react-native-gifted-charts` ve `react-native-chart-kit` kütüphaneleri karşılaştırıldı.
+* Kullanım kolaylığı, mobil uyumluluk, görünüm özelleştirme ve veri gösterimi açısından `react-native-gifted-charts` tercih edildi.
+* `by-store-location` endpointinden gelen veriler kullanılarak React Native tarafında Pie Chart ekranı oluşturuldu.
+* Chart görünümünün yanında UI tarafındaki yapıya benzer tablo görünümü de eklendi.
+* Böylece verinin yalnızca grafik üzerinde değil, tablo formatında da okunabilir şekilde gösterilmesi sağlandı.
+
+</details>
+
+<details>
+<summary>Gün 5 - Proje Sunumu ve Genel Değerlendirme</summary>
+
+* Hafta boyunca yapılan geliştirmeler genel olarak gözden geçirildi.
+* Docker yapılandırması, local MongoDB kullanımı, `.env` yönetimi, JWT authentication ve React Native entegrasyonları sunuma hazırlandı.
+* Login/register akışı, token saklama yapısı ve protected endpoint mantığı anlatıldı.
+* React Native tarafında oluşturulan Pie Chart ve tablo görünümü gösterildi.
+* Projenin web, backend, Docker ve mobil taraflarında yapılan geliştirmeler bütünsel olarak sunuldu.
+
+</details>
+
+### 4. Hafta Teknik Kazanımları
+
+* Docker ortamında local MongoDB kullanımına yönelik ayrı compose yapısı oluşturuldu.
+* Hassas konfigürasyon değerlerinin `.env` dosyasına taşınması sağlandı.
+* Kullanıcıya örnek environment değişkenlerini göstermek için `.env.example` dosyası hazırlandı.
+* Proje kodları okunabilirlik, sürdürülebilirlik ve yapı açısından genel olarak incelendi.
+* React Native tarafında login ve register ekranları oluşturuldu.
+* Backend tarafında JWT tabanlı authentication yapısı kuruldu.
+* JWT üretimi ve doğrulaması için gerekli .NET kütüphaneleri projeye dahil edildi.
+* Mobil tarafta JWT saklama işlemi için `expo-secure-store` kullanıldı.
+* Web ortamında token ve kullanıcı tercihleri için `localStorage` kullanımı değerlendirildi.
+* Protected endpoint mantığı `[Authorize]` attribute’u ile uygulandı.
+* Token süresi dolduğunda kullanıcının tekrar login ekranına yönlendirilmesi üzerine çalışma yapıldı.
+* React Native için chart kütüphaneleri araştırıldı.
+* `react-native-gifted-charts` ve `react-native-chart-kit` karşılaştırıldı.
+* `by-store-location` endpointinden gelen veriler React Native tarafında Pie Chart olarak gösterildi.
+* Chart ekranına tablo görünümü eklenerek veri okunabilirliği artırıldı.
+* Projenin genel sunumu yapıldı.
+
+### 4. Hafta Değerlendirmesi
+
+Dördüncü hafta, projenin mobil uygulama tarafının daha gerçekçi bir kullanıcı akışına yaklaştırıldığı bir hafta oldu. Backend tarafında JWT authentication yapısı kurularak login/register işlemleri güvenli hale getirildi. Token’ın web ve mobil ortamlarda farklı saklanması gerektiği görülerek web tarafında `localStorage`, mobil tarafta ise `expo-secure-store` kullanımı değerlendirildi. Ayrıca protected endpoint yapısı ile token geçerlilik kontrolü uygulandı. React Native tarafında chart kütüphaneleri karşılaştırılarak `react-native-gifted-charts` ile Pie Chart ekranı oluşturuldu ve tablo görünümüyle desteklendi. Docker ve environment yönetimi tarafında yapılan düzenlemelerle proje daha güvenli, taşınabilir ve sürdürülebilir bir yapıya yaklaştırıldı.
