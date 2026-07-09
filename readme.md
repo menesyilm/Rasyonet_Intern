@@ -1,37 +1,92 @@
-# Rasyonet Intern
+# Rasyonet Intern Dashboard
 
-Rasyonet Intern, ASP.NET Core Web API ve React/Vite tabanli bir dashboard uygulamasidir. Proje; MSSQL ve MongoDB uzerinden satis/kategori verilerini yonetir, grafik verilerini API ile sunar, MongoDB degisikliklerini SignalR ile frontend'e anlik bildirir ve Docker Compose ile tum servisleri birlikte calistirabilir.
+Rasyonet Intern, performans verilerini ve satış chartlarını gösteren bir dashboard uygulamasıdır. Proje; .NET 8 Web API, React/Vite web arayüzü, React Native Expo mobil uygulaması, MSSQL, MongoDB, SignalR, Quartz, Docker ve test araçlarıyla geliştirilmiştir.
 
-## Icerik
+Uygulamanın ana amacı kategori bazlı performans verilerini tablo olarak göstermek, satış verilerini grafiklerle analiz etmek ve MongoDB üzerinde gerçekleşen veri değişikliklerini frontend tarafına anlık olarak yansıtmaktır.
 
-- ASP.NET Core 8 Web API
-- React 19 + Vite frontend
-- MSSQL veri tabani
-- MongoDB document store
-- MongoDB Change Stream ile degisiklik takibi
-- SignalR ile realtime chart yenileme
-- MemoryCache ve cache invalidation
-- Quartz ile zamanlanmis SQL -> MongoDB senkronizasyonu
+## İçerik
+
+- .NET 8 ASP.NET Core Web API
+- React 19 + Vite web dashboard
+- React Native Expo mobil uygulaması
+- MSSQL ve MongoDB veri katmanı
+- MongoDB Change Stream ile veri değişikliği takibi
+- SignalR ile anlık chart yenileme
+- MemoryCache ve cache invalidation yapısı
+- Quartz ile zamanlanmış SQL -> MongoDB senkronizasyonu
+- JWT tabanlı login/register akışı
 - NUnit backend testleri
 - Jest/Testing Library frontend testleri
 - k6 stres testi
-- Docker ve Docker Compose destegi
+- Docker ve Docker Compose desteği
 
-## Proje Yapisi
+## Proje Yapısı
 
 ```text
 .
-|-- Rasyonet_Intern.API/       # ASP.NET Core Web API
-|-- Rasyonet_Intern.UI/        # React + Vite frontend
-|-- Rasyonet_Intern.Test/      # NUnit backend testleri
-|-- stress-test/               # k6 yuk testi
-|-- docker-compose.yml         # API, UI, MSSQL, MongoDB servisleri
-|-- Rasyonet_Intern.slnx       # .NET solution
-|-- INTERNSHIP_SUMMARY.md      # Staj sureci teknik ozeti
-`-- Readme.md
+|-- Rasyonet_Intern.API/          # .NET 8 ASP.NET Core Web API
+|-- Rasyonet_Intern.UI/           # React + Vite web frontend
+|-- Rasyonet_Intern.Mobile/       # React Native Expo mobil/web istemci
+|-- Rasyonet_Intern.Test/         # NUnit backend test projesi
+|-- stress-test/                  # k6 yük testi
+|-- docker-compose.yml            # API, UI, MSSQL ve MongoDB servisleri
+|-- docker-compose.local-db.yml   # Local DB ile API/UI çalıştırma yapısı
+|-- .env.example                  # Örnek ortam değişkenleri
+|-- internship_summary.md         # Haftalık staj teknik özeti
+|-- memory.md                     # Proje hafızası
+|-- skills.md                     # AI çalışma standartları
+|-- RTK.md                        # RTK kullanım notları
+|-- Rasyonet_Intern.slnx          # .NET solution
+`-- readme.md
 ```
 
-## Teknolojiler
+## Ana Modüller
+
+### Backend
+
+Backend tarafı `Rasyonet_Intern.API` klasöründe yer alır. Controller, repository, service, document, entity ve DTO yapıları ayrı tutulmuştur.
+
+- `Controllers/`: HTTP endpointleri.
+- `Data/Sql/`: EF Core `AppDbContext`.
+- `Data/Mongo/`: MongoDB context ve ayarları.
+- `Entities/`: MSSQL entity modelleri.
+- `Documents/`: MongoDB document modelleri.
+- `DTOs/`: API response ve request modelleri.
+- `Repositories/`: MongoDB okuma ve aggregation repositoryleri.
+- `Services/`: cache, auth, background watcher, migration ve sync servisleri.
+- `Jobs/`: Quartz job tanımları.
+- `Hubs/`: SignalR dashboard hub.
+- `Settings/`: JWT gibi konfigürasyon modelleri.
+
+Backend akışı genel olarak `Controller -> Service/Repository -> MSSQL veya MongoDB` şeklindedir. Entity modelleri doğrudan API response olarak dışarı verilmez; DTO kullanımı tercih edilmiştir.
+
+### Web Frontend
+
+Web frontend `Rasyonet_Intern.UI` klasöründe yer alır.
+
+- `/`: Performans sayfası. Kategori bazlı performans tablosunu gösterir.
+- `/charts`: Satış chartları sayfası. Bar chart, pie chart ve line chart yapılarını içerir.
+- `src/services/`: API ve SignalR client kodları.
+- `src/components/`: chart, navigation, status ve ortak UI componentleri.
+- `reports/`: Figma/MCP ve farklı AI model çıktılarının karşılaştırıldığı deney sayfaları.
+
+Chart tarafında amCharts 5 kullanılmıştır. SignalR üzerinden `salesChartsInvalidated` bildirimi geldiğinde chart verileri tekrar çekilir.
+
+### Mobil Uygulama
+
+Mobil uygulama `Rasyonet_Intern.Mobile` klasöründe React Native Expo ile geliştirilmiştir.
+
+- `app/`: Expo Router route dosyaları.
+- `app/auth/`: login ve register ekranları.
+- `app/index.tsx`: performans ekranı.
+- `app/charts.tsx`: chart ekranı.
+- `services/`: API client, auth session ve token storage servisleri.
+- `types/`: TypeScript modelleri.
+- `components/performance/`: performans ekranı componentleri.
+
+Mobil tarafta login/register akışı JWT ile çalışır. Token native ortamda `expo-secure-store`, web ortamında ise `localStorage` ile saklanır. Chart ekranında React Native ile uyumlu olduğu için `react-native-gifted-charts` tercih edilmiştir.
+
+## Kullanılan Teknolojiler
 
 ### Backend
 
@@ -46,6 +101,7 @@ Rasyonet Intern, ASP.NET Core Web API ve React/Vite tabanli bir dashboard uygula
 - OpenTelemetry
 - Swagger
 - MemoryCache
+- JWT Bearer Authentication
 
 ### Frontend
 
@@ -58,40 +114,48 @@ Rasyonet Intern, ASP.NET Core Web API ve React/Vite tabanli bir dashboard uygula
 - Jest
 - Testing Library
 
-### Altyapi ve Test
+### Mobil
+
+- React Native
+- Expo
+- Expo Router
+- TypeScript
+- expo-secure-store
+- react-native-gifted-charts
+- react-native-svg
+
+### Test ve Altyapı
 
 - Docker
 - Docker Compose
 - NUnit
 - Moq
 - FluentAssertions
+- Jest
 - k6
 
-## Uygulama Akisi
+## Uygulama Akışı
 
-1. Backend, MSSQL ve MongoDB baglantilarini kurar.
-2. API, kategori ve satis verilerini controller'lar uzerinden disari acar.
-3. Chart endpointleri sik kullanildigi icin MemoryCache ile cache'lenir.
-4. MongoDB Change Stream, veri degisikliklerini izler.
-5. Veri degistiginde ilgili cache anahtarlari temizlenir.
-6. SignalR hub, frontend'e `salesChartsInvalidated` bildirimi gonderir.
-7. Frontend chart verilerini sessizce yeniden ceker ve ekrani gunceller.
-8. Quartz job, her gun saat 10:00'da MSSQL'den MongoDB'ye senkronizasyon calistiracak sekilde ayarlanmistir.
+1. Backend, MSSQL ve MongoDB bağlantılarını kurar.
+2. API, kategori ve satış verilerini controllerlar üzerinden dışarı açar.
+3. Performans sayfası kategori verilerini `GET /api/Categories` üzerinden alır.
+4. Chart sayfası satış verilerini `GET /api/Sales` ve chart endpointleri üzerinden alır.
+5. Chart endpointleri sık kullanıldığı için MemoryCache ile cache'lenir.
+6. MongoDB Change Stream, `Sales` collection değişikliklerini izler.
+7. Veri değiştiğinde ilgili cache anahtarları temizlenir.
+8. SignalR hub frontend'e `salesChartsInvalidated` bildirimi gönderir.
+9. Frontend chart verilerini tekrar çekerek güncel veriyi gösterir.
+10. Quartz job, SQL verilerini belirli zamanlarda MongoDB'ye senkronize eder.
 
-## Sayfalar
+## Önemli Endpointler
 
-- `/`: Performans sayfasi. Kategori bazli performans tablosu, acilir kategori satirlari ve siralama kontrolleri icerir.
-- `/charts`: Grafik sayfasi. Odeme yontemi, magazaya gore satis ve aylik satis trendi grafiklerini gosterir. SignalR baglanti durumu bu sayfada izlenebilir.
-
-## API Endpointleri
-
-Varsayilan Docker ortaminda API adresi:
+Varsayılan Docker ortamında API adresi:
 
 ```text
 http://localhost:5010
 ```
 
-Baslica endpointler:
+Genel endpointler:
 
 ```text
 GET /health
@@ -106,20 +170,31 @@ GET /api/Sales/chart/monthly-trend
 GET /hubs/dashboard
 ```
 
-## Docker ile Calistirma
+Auth endpointleri:
 
-On kosullar:
+```text
+POST /api/Users/register
+POST /api/Users/login
+GET /api/Users/get-all-users
+GET /api/Profiles/me
+```
+
+`GET /api/Profiles/me` JWT Bearer token ister. Token geçerliyse kullanıcı bilgileri döner; token süresi dolmuşsa veya geçersizse kullanıcı tekrar login akışına yönlendirilir.
+
+## Docker ile Çalıştırma
+
+Ön koşullar:
 
 - Docker Desktop
 - Docker Compose
 
-Kok dizinde calistirin:
+Kök dizinde çalıştırın:
 
 ```bash
 docker compose up --build
 ```
 
-Servisler:
+Varsayılan servis adresleri:
 
 ```text
 Frontend: http://localhost:5173
@@ -129,69 +204,63 @@ MSSQL:    localhost:1433
 MongoDB:  localhost:27017
 ```
 
-Container'lari durdurmak icin:
+Containerları durdurmak için:
 
 ```bash
 docker compose down
 ```
 
-Volume'leri de silmek isterseniz:
+Volume verilerini de silmek için:
 
 ```bash
 docker compose down -v
 ```
 
-## Lokal Gelistirme
+Local MSSQL ve local MongoDB kullanarak yalnızca API/UI containerlarını çalıştırmak için:
+
+```bash
+docker compose -f docker-compose.local-db.yml up --build
+```
+
+Bu senaryoda gerekli connection string ve secret değerleri `.env` dosyasında veya terminal environment'ında tanımlanmalıdır. Örnek değişkenler için `.env.example` dosyasına bakılmalıdır. Gerçek şifre, token, API key veya connection string değerleri dokümantasyona yazılmamalıdır.
+
+## Lokal Geliştirme
 
 ### Backend
 
-On kosullar:
+Ön koşullar:
 
 - .NET 8 SDK
 - SQL Server
-- MongoDB replica set olarak calisan lokal MongoDB
+- MongoDB replica set modunda çalışan lokal MongoDB
 
-API ayarlari `Rasyonet_Intern.API/appsettings.json` icindedir:
-
-```json
-{
-  "MongoDbSettings": {
-    "ConnectionString": "mongodb://localhost:27017/?replicaSet=rs0",
-    "DatabaseName": "Rasyonet_Intern"
-  },
-  "SqlDbSettings": {
-    "ConnectionString": "Server=Enes\\SQLEXPRESS;Database=Rasyonet_Intern;Trusted_Connection=True;TrustServerCertificate=True;"
-  }
-}
-```
-
-Calistirma:
+Kurulum ve çalıştırma:
 
 ```bash
 dotnet restore
 dotnet run --project Rasyonet_Intern.API/Rasyonet_Intern.API.csproj
 ```
 
-Migration uygulamak icin:
+Migration uygulamak için:
 
 ```bash
 dotnet ef database update --project Rasyonet_Intern.API/Rasyonet_Intern.API.csproj
 ```
 
-MongoDB'den MSSQL'e manuel veri aktarimi icin:
+MongoDB'den MSSQL'e manuel veri aktarımı için:
 
 ```bash
 dotnet run --project Rasyonet_Intern.API/Rasyonet_Intern.API.csproj -- --migrate-mongo-to-sql
 ```
 
-### Frontend
+### Web Frontend
 
-On kosullar:
+Ön koşullar:
 
 - Node.js
 - npm
 
-Kurulum ve calistirma:
+Kurulum ve çalıştırma:
 
 ```bash
 cd Rasyonet_Intern.UI
@@ -199,63 +268,83 @@ npm install
 npm run dev
 ```
 
-Varsayilan frontend adresi:
+Varsayılan frontend adresi:
 
 ```text
 http://localhost:5173
 ```
 
-Frontend ortam degiskenleri:
+Frontend ortam değişkenleri:
 
 ```text
 VITE_API_BASE_URL=http://localhost:5010/api
 VITE_SIGNALR_URL=http://localhost:5010/hubs/dashboard
 ```
 
+### Mobil Uygulama
+
+Ön koşullar:
+
+- Node.js
+- npm
+- Expo CLI veya `npx expo`
+- Mobil cihazda Expo Go veya web çalışma ortamı
+
+Kurulum ve çalıştırma:
+
+```bash
+cd Rasyonet_Intern.Mobile
+npm install
+npm run web
+```
+
+Native cihazda çalıştırmak için:
+
+```bash
+cd Rasyonet_Intern.Mobile
+npm start
+```
+
+Mobil cihazdan API'ye erişirken bilgisayarın LAN IP adresi kullanılmalıdır. İnternet ağı değiştiğinde IPv4 adresi de değişebileceği için mobil API base URL değeri kontrol edilmelidir.
+
 ## Testler
 
-### Backend Testleri
+Backend testleri:
 
 ```bash
 dotnet test
-```
-
-Sadece test projesini calistirmak icin:
-
-```bash
 dotnet test Rasyonet_Intern.Test/Rasyonet_Intern.TEST.csproj
 ```
 
-### Frontend Testleri
+Frontend testleri:
 
 ```bash
 cd Rasyonet_Intern.UI
 npm test
 ```
 
-Lint:
+Frontend lint ve build:
 
 ```bash
 cd Rasyonet_Intern.UI
 npm run lint
-```
-
-Build:
-
-```bash
-cd Rasyonet_Intern.UI
 npm run build
 ```
 
-### Stres Testi
+Mobil lint:
 
-On kosul: k6 kurulu olmali ve API `http://localhost:5010` uzerinden calisiyor olmali.
+```bash
+cd Rasyonet_Intern.Mobile
+npm run lint
+```
+
+k6 stres testi:
 
 ```bash
 k6 run stress-test/load-test.js
 ```
 
-Stres testi su endpointleri hedefler:
+Stres testi satış chart endpointlerini hedefler:
 
 ```text
 /api/Sales/chart/by-store-location
@@ -263,28 +352,15 @@ Stres testi su endpointleri hedefler:
 /api/Sales/chart/monthly-trend
 ```
 
-## Docker Servisleri
-
-`docker-compose.yml` icindeki servisler:
-
-- `backend`: ASP.NET Core API, host portu `5010`, container portu `8080`
-- `frontend`: Vite frontend, port `5173`
-- `mssql`: SQL Server 2022, port `1433`
-- `mongodb`: MongoDB 7.0, replica set `rs0`, port `27017`
-
-Kalici veriler Docker volume'lerinde tutulur:
-
-- `mssql_data`
-- `mongodb_data`
-
 ## Dikkat Edilecek Noktalar
 
-- MongoDB Change Stream kullanildigi icin MongoDB'nin replica set modunda calismasi gerekir.
-- Docker ortaminda backend, MongoDB'ye `mongodb:27017` servis adi ile baglanir.
-- Frontend tarayicida calistigi icin API'ye `http://localhost:5010` uzerinden gider.
-- SignalR icin CORS ayari `http://localhost:5173` origin'ine izin verecek sekilde yapilandirilmistir.
-- OpenTelemetry OTLP exporter varsayilan olarak `http://localhost:4317` adresine veri gondermeye calisir.
+- MongoDB Change Stream kullanılacağı için MongoDB replica set modunda çalışmalıdır.
+- Docker ortamında backend, MongoDB'ye container servis adı üzerinden bağlanır.
+- Tarayıcıdaki frontend API'ye `http://localhost:5010` üzerinden gider.
+- SignalR için CORS ayarları frontend origin'ine izin verecek şekilde yapılandırılmalıdır.
+- Gerçek secret, token, API key veya connection string değerleri README, `memory.md` ya da kaynak kod içine yazılmamalıdır.
+- Mobil cihazdan backend'e erişirken `localhost` yerine bilgisayarın LAN IP adresi kullanılmalıdır.
 
 ## Lisans
 
-Bu proje staj calismasi kapsaminda gelistirilmistir.
+Bu proje staj çalışması kapsamında geliştirilmiştir.
