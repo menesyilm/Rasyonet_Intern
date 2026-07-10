@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: 92ced532-f60c-4dec-88b6-a1ccd0a59c20
+
+localResources:
+  specs:
+    - ../Rasyonet_Intern.API/obj/Debug/net8.0/EndpointInfo/Rasyonet_Intern.API.json
