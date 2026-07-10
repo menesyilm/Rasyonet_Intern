@@ -1,5 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { getAccessToken, removeAccessToken } from '@/services/tokenStorage';
+import { AppState } from 'react-native';
+import {
+    getAccessToken,
+    getAccessTokenExpiresAt,
+    removeAccessToken,
+} from '@/services/tokenStorage';
+
+const SESSION_EXPIRED_MESSAGE = 'Giriş süreniz doldu. Lütfen tekrar giriş yapınız.';
 
 type AuthSessionContextValue = {
     isCheckingAuth: boolean;
@@ -20,7 +27,16 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
 
     const refreshSession = useCallback(async () => {
         const token = await getAccessToken();
-        setIsAuthenticated(Boolean(token));
+        const expiresAt = await getAccessTokenExpiresAt();
+        const isExpired = !expiresAt || new Date(expiresAt).getTime() <= Date.now();
+
+        if (!token || isExpired) {
+            await removeAccessToken();
+            setIsAuthenticated(false);
+            return;
+        }
+
+        setIsAuthenticated(true);
     }, []);
 
     const markAuthenticated = useCallback(() => {
@@ -44,10 +60,20 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
         async function loadSession() {
             try {
                 const token = await getAccessToken();
+                const expiresAt = await getAccessTokenExpiresAt();
+                const isExpired = !expiresAt || new Date(expiresAt).getTime() <= Date.now();
 
                 if (!isActive) return;
 
-                setIsAuthenticated(Boolean(token));
+                if (!token || isExpired) {
+                    await removeAccessToken();
+                    if (isActive) {
+                        setIsAuthenticated(false);
+                    }
+                    return;
+                }
+
+                setIsAuthenticated(true);
             } finally {
                 if (isActive) {
                     setIsCheckingAuth(false);
@@ -61,6 +87,47 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
             isActive = false;
         };
     }, []);
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            return;
+        }
+
+        let isActive = true;
+        let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+        async function scheduleExpiration() {
+            const expiresAt = await getAccessTokenExpiresAt();
+            if (!isActive) return;
+
+            const expirationTime = expiresAt ? new Date(expiresAt).getTime() : Number.NaN;
+            const remainingMilliseconds = expirationTime - Date.now();
+
+            if (!Number.isFinite(remainingMilliseconds) || remainingMilliseconds <= 0) {
+                await signOut(SESSION_EXPIRED_MESSAGE);
+                return;
+            }
+
+            timeoutId = setTimeout(() => {
+                void signOut(SESSION_EXPIRED_MESSAGE);
+            }, remainingMilliseconds);
+        }
+
+        void scheduleExpiration();
+
+        const appStateSubscription = AppState.addEventListener('change', nextState => {
+            if (nextState === 'active') {
+                if (timeoutId) clearTimeout(timeoutId);
+                void scheduleExpiration();
+            }
+        });
+
+        return () => {
+            isActive = false;
+            if (timeoutId) clearTimeout(timeoutId);
+            appStateSubscription.remove();
+        };
+    }, [isAuthenticated, signOut]);
 
     const value = useMemo(
         () => ({

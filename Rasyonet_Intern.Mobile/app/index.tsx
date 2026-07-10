@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import PerformanceCard from '@/components/performance/PerformanceCard';
 import { getCategories, isAuthRequiredError } from '@/services/categoryService';
 import { useAuthSession } from '@/services/authSession';
-import { getAccessTokenExpiresAt } from '@/services/tokenStorage';
 import { Category, Performance } from '@/types/category';
 
 export default function IndexScreen() {
@@ -62,37 +61,6 @@ export default function IndexScreen() {
 
         return () => {
             isActive = false;
-        };
-    }, [handleSessionExpired]);
-
-    useEffect(() => {
-        let isActive = true;
-        let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-        async function scheduleSessionExpirationAlert() {
-            const expiresAt = await getAccessTokenExpiresAt();
-
-            if (!isActive || !expiresAt) {
-                return;
-            }
-
-            const remainingMilliseconds = new Date(expiresAt).getTime() - Date.now();
-
-            if (remainingMilliseconds <= 0) {
-                handleSessionExpired();
-                return;
-            }
-
-            timeoutId = setTimeout(handleSessionExpired, remainingMilliseconds);
-        }
-
-        scheduleSessionExpirationAlert();
-
-        return () => {
-            isActive = false;
-            if (timeoutId) {
-                clearTimeout(timeoutId);
-            }
         };
     }, [handleSessionExpired]);
 
